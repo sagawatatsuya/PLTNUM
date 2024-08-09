@@ -132,7 +132,7 @@ model_weights = glob.glob(os.path.join(config.model_path, "/*.pth"))
 for fold in range(config.folds):
     model = PLTNUM(config).device()
     model_weight = [w for w in model_weights if f"fold{fold}.pth" in w]
-    model.load_state_dict(torch.load(model_weight, map_location='cpu')['model'])
+    model.load_state_dict(torch.load(model_weight, map_location='cpu'))
     model.eval()
     df = oof_df[oof_df['fold'] == fold].reset_index(drop=True)
 

@@ -1,27 +1,31 @@
 # PLTNUM
-環境構築
-conda create --name pltnum python=3.11.8
-conda activate pltnum
-conda install anaconda::requests
-conda install conda-forge::biopython
-conda install anaconda::pandas
-conda install anaconda::numpy
-conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
-conda install anaconda::scikit-learn
-conda install conda-forge::transformers
+model description
+
+![model image](https://github.com/sagawatatsuya/PLTNUM/blob/main/model-image.png)
+
+- [PLTNUM](#pltnum)  
+  - [Installation](#installation)  
+  - [Usage](#usage)  
+  - [Fine-tuning](#fine-tuning)  
+  - [Structure](#structure) 
+  - [Authors](#authors)
+  - [Citation](#citation)  
+
+
+## Installation
+```bash
+git clone https://github.com/sagawatatsuya/PLTNUM.git
+cd PLTNUM
+conda env create -f environment.yml
+```
+
+## Usage
+
+
 
 1. 
 https://static-content.springer.com/esm/art%3A10.1038%2Fnature10098/MediaObjects/41586_2011_BFnature10098_MOESM304_ESM.xls
 をダウンロードする
-
-pdb中からaaの情報は取れるから、必要ない
-<!-- 2. 
-python scripts/get_aa_from_uniprot_accession.py \
-    --file_path="data/41586_2011_BFnature10098_MOESM304_ESM.xls" \
-    --sheet_name="Sheet1" \
-    --uniprotids_column="Uniprot IDs" \
-    --num_processes=30
-でaccessionidからaaを取得する -->
 
 3. 
 mouseのpdbファイルダウンロード
@@ -331,4 +335,27 @@ python scripts/predict.py \
     --output_dir="./Peptide_Level_Turnover_Measurements_Enable_the_Study_of_Proteoform_Dynamics_prediction_result/" \
     --task="classification" \
     --sequence_col="aa_foldseek"
+```
+
+
+### Train PLTNUM classification
+```
+python scripts/train.py \
+    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
+    --model="facebook/esm2_t33_650M_UR50D" \
+    --architecture="ESM2" \
+    --lr=2e-5 \
+    --epochs=10 \
+    --batch_size=4 \
+    --use_amp \
+    --num_workers=4 \
+    --max_length=512 \
+    --used_sequence="left" \
+    --mask_ratio=0.05 \
+    --mask_prob=0.2 \
+    --n_folds=10 \
+    --output_dir="./classification_ESM2_mouse/" \
+    --task="classification" \
+    --target_col="Protein half-life average [h]" \
+    --sequence_col="aa"
 ```

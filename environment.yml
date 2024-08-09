@@ -33,10 +33,11 @@ dependencies:
   - brotli-python=1.0.9=py311h6a678d5_8
   - bzip2=1.0.8=h5eee18b_6
   - c-ares=1.19.1=h5eee18b_0
-  - ca-certificates=2024.3.11=h06a4308_0
-  - certifi=2024.7.4=py311h06a4308_0
+  - ca-certificates=2024.7.4=hbcca054_0
+  - certifi=2024.7.4=pyhd8ed1ab_0
   - cffi=1.16.0=py311h5eee18b_1
   - charset-normalizer=2.0.4=pyhd3eb1b0_0
+  - cloudpickle=3.0.0=pyhd8ed1ab_0
   - cryptography=42.0.5=py311hdda0065_1
   - cuda-cudart=12.1.105=0
   - cuda-cupti=12.1.105=0
@@ -93,6 +94,7 @@ dependencies:
   - libiconv=1.16=h5eee18b_3
   - libidn2=2.3.4=h5eee18b_0
   - libjpeg-turbo=2.0.0=h9bf148f_0
+  - libllvm14=14.0.6=hdb19cb5_3
   - libnghttp2=1.57.0=h2d74bed_0
   - libnpp=12.0.2.50=0
   - libnvjitlink=12.1.105=0
@@ -100,7 +102,7 @@ dependencies:
   - libpng=1.6.39=h5eee18b_0
   - libprotobuf=3.20.3=he621ea3_0
   - libssh2=1.11.0=h251f7ec_0
-  - libstdcxx-ng=11.2.0=h1234567_1
+  - libstdcxx-ng=14.1.0=hc0a3c3a_0
   - libtasn1=4.19.0=h5eee18b_0
   - libthrift=0.15.0=h1795dd8_2
   - libtiff=4.5.1=h6a678d5_0
@@ -108,6 +110,7 @@ dependencies:
   - libuuid=1.41.5=h5eee18b_0
   - libwebp-base=1.3.2=h5eee18b_0
   - llvm-openmp=14.0.6=h9e868ea_0
+  - llvmlite=0.43.0=py311h6a678d5_0
   - lz4-c=1.9.4=h6a678d5_1
   - markupsafe=2.1.3=py311h5eee18b_0
   - mkl=2023.1.0=h213fc3f_46344
@@ -122,12 +125,13 @@ dependencies:
   - ncurses=6.4=h6a678d5_0
   - nettle=3.7.3=hbbd107a_1
   - networkx=3.3=py311h06a4308_0
+  - numba=0.60.0=py311h4bc866e_0
   - numexpr=2.8.7=py311h65dcdc2_0
   - numpy=1.26.0=py311h08b1b3b_0
   - numpy-base=1.26.0=py311hf175353_0
   - openh264=2.1.1=h4ff587b_0
   - openjpeg=2.4.0=h9ca470c_1
-  - openssl=3.0.14=h5eee18b_0
+  - openssl=3.3.1=h4bc722e_2
   - orc=1.7.4=hb3bc3d3_1
   - packaging=24.1=py311h06a4308_0
   - pandas=2.1.1=py311ha02d727_0
@@ -157,7 +161,9 @@ dependencies:
   - scikit-learn=1.2.2=py311h6a678d5_1
   - scipy=1.13.1=py311h08b1b3b_0
   - setuptools=69.5.1=py311h06a4308_0
+  - shap=0.45.1=cpu_py311h9c1f9ec_0
   - six=1.16.0=pyhd3eb1b0_1
+  - slicer=0.0.8=pyhd8ed1ab_0
   - snappy=1.1.10=h6a678d5_1
   - sqlite=3.45.3=h5eee18b_0
   - sympy=1.12=py311h06a4308_0
@@ -183,4 +189,3 @@ dependencies:
   - yarl=1.9.3=py311h5eee18b_0
   - zlib=1.2.13=h5eee18b_1
   - zstd=1.5.5=hc292b87_2
-prefix: /home/sagawa/miniconda3/envs/pltnum

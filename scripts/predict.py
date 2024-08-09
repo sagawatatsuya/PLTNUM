@@ -159,7 +159,7 @@ def predict(folds, model_path):
     )
 
     model = PLTNUM(config)
-    model.load_state_dict(torch.load(model_path, map_location=device)["model"])
+    model.load_state_dict(torch.load(model_path, map_location=device))
 
     model.to(device)
 

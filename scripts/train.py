@@ -49,18 +49,14 @@ def parse_args():
         default="SaProt",
         help="The name of a model architecture. 'ESM2', 'SaProt' or 'LSTM'.",
     )
-    parser.add_argument(
-        "--lr", type=float, default=2e-5, help="Learning rate."
-    )
+    parser.add_argument("--lr", type=float, default=2e-5, help="Learning rate.")
     parser.add_argument(
         "--epochs",
         type=int,
         default=5,
         help="Number of epochs for training.",
     )
-    parser.add_argument(
-        "--batch_size", type=int, default=4, help="Batch size."
-    )
+    parser.add_argument("--batch_size", type=int, default=4, help="Batch size.")
     parser.add_argument(
         "--seed",
         type=int,
@@ -406,12 +402,16 @@ def train_loop(folds, fold, cfg):
             best_score = val_score
             cfg.logger.info(f"Epoch {epoch+1} - Save Best Score: {val_score:.4f} Model")
             torch.save(
-                {"model": model.state_dict(), "predictions": predictions},
+                predictions,
+                os.path.join(cfg.output_dir, f"predictions.pth"),
+            )
+            torch.save(
+                model.state_dict(),
                 os.path.join(cfg.output_dir, f"model_fold{fold}.pth"),
             )
     predictions = torch.load(
-        os.path.join(cfg.output_dir, f"model_fold{fold}.pth"), map_location="cpu"
-    )["predictions"]
+        os.path.join(cfg.output_dir, f"predictions.pth"), map_location="cpu"
+    )
     valid_folds["prediction"] = predictions
     cfg.logger.info(f"[Fold{fold}] Best score: {best_score}")
     torch.cuda.empty_cache()
@@ -433,12 +433,12 @@ def get_embedding(folds, fold, path):
     )
 
     model = PLTNUM(config)
-    model.load_state_dict(torch.load(path, map_location=torch.device("cpu"))["model"])
+    model.load_state_dict(torch.load(path, map_location=torch.device("cpu")))
     model.to(device)
 
     model.eval()
     embedding_list = []
-    for (inputs, _) in valid_loader:
+    for inputs, _ in valid_loader:
         inputs = inputs.to(device)
         with torch.no_grad():
             with torch.cuda.amp.autocast(enabled=config.use_amp):
@@ -462,7 +462,6 @@ if __name__ == "__main__":
     if config.used_sequence == "both":
         config.max_length = config.max_length + 1
 
-
     LOGGER = get_logger(os.path.join(config.output_dir, "output"))
     config.logger = LOGGER
 
@@ -470,7 +469,9 @@ if __name__ == "__main__":
 
     train_df = pd.read_csv(config.data_path)
 
-    train_df = train_df.drop_duplicates(subset=[config.sequence_col], keep="first").reset_index(drop=True)
+    train_df = train_df.drop_duplicates(
+        subset=[config.sequence_col], keep="first"
+    ).reset_index(drop=True)
 
     train_df["T1/2 [h]"] = train_df[config.target_col]
 
@@ -499,7 +500,9 @@ if __name__ == "__main__":
         train_df = train_df.apply(get_class, axis=1)
 
     train_df["fold"] = -1
-    kf = StratifiedKFold(n_splits=config.n_folds, shuffle=True, random_state=config.seed)
+    kf = StratifiedKFold(
+        n_splits=config.n_folds, shuffle=True, random_state=config.seed
+    )
     for fold, (trn_ind, val_ind) in enumerate(kf.split(train_df, train_df["class"])):
         train_df.loc[val_ind, "fold"] = int(fold)
 
