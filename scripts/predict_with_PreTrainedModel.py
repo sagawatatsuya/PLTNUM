@@ -104,7 +104,7 @@ def parse_args():
 
 
 def predict(folds, model_path, config):
-    dataset = PLTNUMDataset(config, folds, train=False, is_test=True)
+    dataset = PLTNUMDataset(config, folds, train=False)
     loader = DataLoader(
         dataset,
         batch_size=config.batch_size,
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     config = parse_args()
     config.token_length = 2 if config.architecture == "SaProt" else 1
     config.device = "cuda" if torch.cuda.is_available() else "cpu"
-    
+
     if not os.path.exists(config.output_dir):
         os.makedirs(config.output_dir)
 

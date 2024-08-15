@@ -395,7 +395,7 @@ def train_loop(folds, fold, cfg):
 
 def get_embedding(folds, fold, path):
     valid_folds = folds[folds["fold"] == fold].reset_index(drop=True)
-    valid_dataset = PLTNUMDataset(config, valid_folds, train=False, is_test=True)
+    valid_dataset = PLTNUMDataset(config, valid_folds, train=False)
 
     valid_loader = DataLoader(
         valid_dataset,

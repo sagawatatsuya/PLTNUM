@@ -105,7 +105,7 @@ def predict_fn(valid_loader, model, device):
     model.eval()
     predictions = []
 
-    for inputs in valid_loader:
+    for inputs, _ in valid_loader:
         inputs = inputs.to(device)
         with torch.no_grad():
             with torch.cuda.amp.autocast(enabled=config.use_amp):
@@ -120,7 +120,7 @@ def predict_fn(valid_loader, model, device):
 
 
 def predict(folds, model_path, config):
-    dataset = PLTNUMDataset(config, folds, train=False, is_test=True)
+    dataset = PLTNUMDataset(config, folds, train=False)
     loader = DataLoader(
         dataset,
         batch_size=config.batch_size,
