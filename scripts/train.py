@@ -8,11 +8,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from sklearn.metrics import (
-    accuracy_score,
-    f1_score,
-    r2_score,
-)
+from sklearn.metrics import accuracy_score, f1_score, r2_score
 from sklearn.model_selection import StratifiedKFold
 from torch.optim import Adam
 from torch.optim.lr_scheduler import CosineAnnealingLR
@@ -30,44 +26,46 @@ print("device:", device)
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Training script for protein half-life prediction."
+    )
     parser.add_argument(
         "--data_path",
         type=str,
         required=True,
-        help="The path to data used for training.",
+        help="Path to the training data.",
     )
     parser.add_argument(
         "--model",
         type=str,
         default="westlake-repl/SaProt_650M_AF2",
-        help="The name of a pretrained model or path to a model which you want to use for training. You can use your local models or models uploaded to hugging face.",
+        help="Pretrained model name or path.",
     )
     parser.add_argument(
         "--architecture",
         type=str,
         default="SaProt",
-        help="The name of a model architecture. 'ESM2', 'SaProt' or 'LSTM'.",
+        help="Model architecture: 'ESM2', 'SaProt', or 'LSTM'.",
     )
     parser.add_argument("--lr", type=float, default=2e-5, help="Learning rate.")
     parser.add_argument(
         "--epochs",
         type=int,
         default=5,
-        help="Number of epochs for training.",
+        help="Number of training epochs.",
     )
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size.")
     parser.add_argument(
         "--seed",
         type=int,
         default=42,
-        help="Set seed for reproducibility.",
+        help="Seed for reproducibility.",
     )
     parser.add_argument(
         "--use_amp",
         action="store_true",
         default=False,
-        help="Use amp for mixed precision training.",
+        help="Use AMP for mixed precision training.",
     )
     parser.add_argument(
         "--num_workers",
@@ -79,97 +77,97 @@ def parse_args():
         "--max_length",
         type=int,
         default=512,
-        help="Max length of input sequence. Two tokens are used fo <cls> and <eos> tokens. So the actual length of input sequence is max_length - 2. Padding or truncation is applied to make the length of input sequence equal to max_length.",
+        help="Maximum input sequence length. Two tokens are used fo <cls> and <eos> tokens. So the actual length of input sequence is max_length - 2. Padding or truncation is applied to make the length of input sequence equal to max_length.",
     )
     parser.add_argument(
         "--used_sequence",
         type=str,
         default="left",
-        help="How to use input sequence. 'left': use the left part of the sequence, 'right': use the right part of the sequence, 'both': use both side of the sequence, 'internal': use the internal part of the sequence.",
+        help="Which part of the sequence to use: 'left', 'right', 'both', or 'internal'.",
     )
     parser.add_argument(
         "--padding_side",
         type=str,
         default="right",
-        help="Padding side. 'right' or 'left'.",
+        help="Padding side: 'right' or 'left'.",
     )
     parser.add_argument(
         "--mask_ratio",
         type=float,
         default=0.05,
-        help="The ratio of masking tokens in augmentation.",
+        help="Ratio of mask tokens for augmentation.",
     )
     parser.add_argument(
         "--mask_prob",
         type=float,
         default=0.2,
-        help="The probability to apply mask augmentation.",
+        help="Probability to apply mask augmentation",
     )
     parser.add_argument(
         "--random_delete_ratio",
         type=float,
         default=0.1,
-        help="The ratio of deleting tokens in augmentation.",
+        help="Ratio of deleting tokens in augmentation.",
     )
     parser.add_argument(
         "--random_delete_prob",
         type=float,
         default=-1,
-        help="The probability to apply random delete augmentation.",
+        help="Probability to apply random delete augmentation.",
     )
     parser.add_argument(
         "--random_change_ratio",
         type=float,
         default=0,
-        help="The ratio of changing tokens in augmentation.",
+        help="Ratio of changing tokens in augmentation.",
     )
     parser.add_argument(
         "--truncate_augmentation_prob",
         type=float,
         default=-1,
-        help="The probability to apply truncate augmentation.",
+        help="Probability to apply truncate augmentation.",
     )
     parser.add_argument(
         "--n_folds",
         type=int,
         default=10,
-        help="Number of folds for cross validation.",
+        help="Number of folds for cross-validation.",
     )
     parser.add_argument(
         "--print_freq",
         type=int,
         default=300,
-        help="Frequency of printing log.",
+        help="Log print frequency.",
     )
     parser.add_argument(
         "--fleeze_layer",
         type=int,
         default=-1,
-        help="Fleeze the layers of the model. -1 means not to fleeze any layers.",
+        help="Freeze layers of the model. -1 means no layers are frozen.",
     )
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="/home2/sagawa/protein-half-life-prediction/ver20_56_2/",
+        default="./output",
         help="Output directory.",
     )
     parser.add_argument(
         "--task",
         type=str,
         default="classification",
-        help="Task. 'classification' or 'regression'.",
+        help="Task type: 'classification' or 'regression'.",
     )
     parser.add_argument(
         "--target_col",
         type=str,
         default="Protein half-life average [h]",
-        help="The column name of protein half-life.",
+        help="Column name of the target.",
     )
     parser.add_argument(
         "--sequence_col",
         type=str,
         default="aa_foldseek",
-        help="The column name of amino acid sequence.",
+        help="Column name fot the input sequence.",
     )
 
     return parser.parse_args()
@@ -179,64 +177,53 @@ def train_fn(train_loader, model, criterion, optimizer, epoch, cfg):
     model.train()
     scaler = torch.cuda.amp.GradScaler(enabled=cfg.use_amp)
     losses = AverageMeter()
-    label_list = []
-    pred_list = []
+    label_list, pred_list = [], []
     start = time.time()
+
     for step, (inputs, labels) in enumerate(train_loader):
-        inputs = inputs.to(cfg.device)
-        if cfg.task == "classification":
-            labels = labels.float().to(cfg.device)
-        elif cfg.task == "regression":
-            labels = labels.to(dtype=torch.half).to(cfg.device)
+        inputs, labels = inputs.to(cfg.device), labels.to(cfg.device)
+        labels = (
+            labels.float()
+            if cfg.task == "classification"
+            else labels.to(dtype=torch.half)
+        )
         batch_size = labels.size(0)
+
         with torch.cuda.amp.autocast(enabled=cfg.use_amp):
             y_preds = model(inputs)
         loss = criterion(y_preds, labels.view(-1, 1))
         losses.update(loss.item(), batch_size)
+
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
         optimizer.zero_grad()
+
         label_list += labels.tolist()
         pred_list += y_preds.tolist()
-        if step % cfg.print_freq == 0 or step == (len(train_loader) - 1):
+
+        if step % cfg.print_freq == 0 or step == len(train_loader) - 1:
             if cfg.task == "classification":
-                pred_list_new = torch.Tensor(pred_list)
-                pred_list_new = (pred_list_new > 0.5).to(dtype=torch.long)
+                pred_list_new = (torch.Tensor(pred_list) > 0.5).to(dtype=torch.long)
+                acc = accuracy_score(label_list, pred_list_new > 0.5)
                 cfg.logger.info(
-                    "Epoch: [{0}][{1}/{2}] "
-                    "Elapsed {remain:s} "
-                    "Loss: {loss.val:.4f}({loss.avg:.4f}) "
-                    "LR: {lr:.8f} "
-                    "Accuracy: {acc:.4f} ".format(
-                        epoch + 1,
-                        step,
-                        len(train_loader),
-                        remain=timeSince(start, float(step + 1) / len(train_loader)),
-                        loss=losses,
-                        lr=optimizer.param_groups[0]["lr"],
-                        acc=accuracy_score(label_list, pred_list_new),
-                    )
+                    f"Epoch: [{epoch + 1}][{step}/{len(train_loader)}] "
+                    f"Elapsed {timeSince(start, float(step + 1) / len(train_loader))} "
+                    f"Loss: {losses.val:.4f}({losses.avg:.4f}) "
+                    f"LR: {optimizer.param_groups[0]['lr']:.8f} "
+                    f"Accuracy: {acc:.4f}"
                 )
             elif cfg.task == "regression":
+                r2 = r2_score(label_list, pred_list)
                 cfg.logger.info(
-                    "Epoch: [{0}][{1}/{2}] "
-                    "Elapsed {remain:s} "
-                    "Loss: {loss.val:.4f}({loss.avg:.4f}) "
-                    "R2 Score: {r2score:.4f} "
-                    "LR: {lr:.8f} ".format(
-                        epoch + 1,
-                        step,
-                        len(train_loader),
-                        remain=timeSince(start, float(step + 1) / len(train_loader)),
-                        loss=losses,
-                        r2score=r2_score(label_list, pred_list),
-                        lr=optimizer.param_groups[0]["lr"],
-                    )
+                    f"Epoch: [{epoch + 1}][{step}/{len(train_loader)}] "
+                    f"Elapsed {timeSince(start, float(step + 1) / len(train_loader))} "
+                    f"Loss: {losses.val:.4f}({losses.avg:.4f}) "
+                    f"R2 Score: {r2:.4f} "
+                    f"LR: {optimizer.param_groups[0]['lr']:.8f}"
                 )
     if cfg.task == "classification":
-        pred_list_new = torch.Tensor(pred_list)
-        pred_list_new = (pred_list_new > 0.5).to(dtype=torch.long)
+        pred_list_new = (torch.Tensor(pred_list) > 0.5).to(dtype=torch.long)
         acc = accuracy_score(label_list, pred_list_new)
         return losses.avg, acc
     elif cfg.task == "regression":
@@ -246,70 +233,60 @@ def train_fn(train_loader, model, criterion, optimizer, epoch, cfg):
 def valid_fn(valid_loader, model, criterion, cfg):
     losses = AverageMeter()
     model.eval()
-    label_list = []
-    pred_list = []
+    label_list, pred_list = [], []
     start = time.time()
+
     for step, (inputs, labels) in enumerate(valid_loader):
-        inputs = inputs.to(cfg.device)
-        if cfg.task == "classification":
-            labels = labels.float().to(cfg.device)
-        elif cfg.task == "regression":
-            labels = labels.to(dtype=torch.half).to(cfg.device)
+        inputs, labels = inputs.to(cfg.device), labels.to(cfg.device)
+        labels = (
+            labels.float()
+            if cfg.task == "classification"
+            else labels.to(dtype=torch.half)
+        )
+
         with torch.no_grad():
             with torch.cuda.amp.autocast(enabled=cfg.use_amp):
-                if cfg.task == "classification":
-                    y_preds = torch.sigmoid(model(inputs))
-                elif cfg.task == "regression":
-                    y_preds = model(inputs)
+                y_preds = (
+                    torch.sigmoid(model(inputs))
+                    if cfg.task == "classification"
+                    else model(inputs)
+                )
         loss = criterion(y_preds, labels.view(-1, 1))
         losses.update(loss.item(), labels.size(0))
 
         label_list += labels.tolist()
         pred_list += y_preds.tolist()
-        if step % cfg.print_freq == 0 or step == (len(valid_loader) - 1):
-            if cfg.task == "classification":
-                pred_list_new = torch.Tensor(pred_list)
-                pred_list_new = (pred_list_new > 0.5).to(dtype=torch.long)
 
+        if step % cfg.print_freq == 0 or step == len(valid_loader) - 1:
+            if cfg.task == "classification":
+                pred_list_new = (torch.Tensor(pred_list) > 0.5).to(dtype=torch.long)
+                acc = accuracy_score(label_list, pred_list_new > 0.5)
+                f1 = f1_score(label_list, pred_list_new, average="macro")
                 cfg.logger.info(
-                    "EVAL: [{0}/{1}] "
-                    "Elapsed {remain:s} "
-                    "Loss: {loss.val:.4f}({loss.avg:.4f}) "
-                    "accuracy: {acc:.4f} "
-                    "f1 score: {f1score}".format(
-                        step,
-                        len(valid_loader),
-                        loss=losses,
-                        acc=accuracy_score(label_list, pred_list_new),
-                        f1score=f1_score(label_list, pred_list_new, average="macro"),
-                        remain=timeSince(start, float(step + 1) / len(valid_loader)),
-                    )
+                    f"EVAL: [{step}/{len(valid_loader)}] "
+                    f"Elapsed {timeSince(start, float(step + 1) / len(valid_loader))} "
+                    f"Loss: {losses.val:.4f}({losses.avg:.4f}) "
+                    f"Accuracy: {acc:.4f} "
+                    f"F1 Score: {f1:.4f}"
                 )
             elif cfg.task == "regression":
+                r2 = r2_score(label_list, pred_list)
                 cfg.logger.info(
-                    "EVAL: [{0}/{1}] "
-                    "Elapsed {remain:s} "
-                    "Loss: {loss.val:.4f}({loss.avg:.4f}) "
-                    "R2 Score: {r2score:.4f} ".format(
-                        step,
-                        len(valid_loader),
-                        loss=losses,
-                        r2score=r2_score(label_list, pred_list),
-                        remain=timeSince(start, float(step + 1) / len(valid_loader)),
-                    )
+                    f"EVAL: [{step}/{len(valid_loader)}] "
+                    f"Elapsed {timeSince(start, float(step + 1) / len(valid_loader))} "
+                    f"Loss: {losses.val:.4f}({losses.avg:.4f}) "
+                    f"R2 Score: {r2:.4f}"
                 )
 
     if cfg.task == "classification":
-        pred_list_new = torch.Tensor(pred_list)
-        pred_list_new = (pred_list_new > 0.5).to(dtype=torch.long)
+        pred_list_new = (torch.Tensor(pred_list) > 0.5).to(dtype=torch.long)
         return (
             f1_score(label_list, pred_list_new, average="macro"),
             accuracy_score(label_list, pred_list_new),
             pred_list,
         )
     elif cfg.task == "regression":
-        predictions = np.array(pred_list)
-        return losses.avg, r2_score(label_list, pred_list), predictions
+        return losses.avg, r2_score(label_list, pred_list), np.array(pred_list)
 
 
 def train_loop(folds, fold, cfg):
@@ -317,7 +294,7 @@ def train_loop(folds, fold, cfg):
     train_folds = folds[folds["fold"] != fold].reset_index(drop=True)
     valid_folds = folds[folds["fold"] == fold].reset_index(drop=True)
 
-    if cfg.architecture == "ESM2" or cfg.architecture == "SaProt":
+    if cfg.architecture in ["ESM2", "SaProt"]:
         train_dataset = PLTNUMDataset(cfg, train_folds, train=True)
         valid_dataset = PLTNUMDataset(cfg, valid_folds, train=False)
     elif cfg.architecture == "LSTM":
@@ -341,14 +318,13 @@ def train_loop(folds, fold, cfg):
         drop_last=False,
     )
 
-    if cfg.architecture == "ESM2" or cfg.architecture == "SaProt":
+    if cfg.architecture in ["ESM2", "SaProt"]:
         model = PLTNUM(cfg)
         if cfg.fleeze_layer >= 0:
             for name, param in model.named_parameters():
                 if f"model.encoder.layer.{cfg.fleeze_layer}" in name:
                     break
-                else:
-                    param.requires_grad = False
+                param.requires_grad = False
         torch.save(model.config, os.path.join(cfg.output_dir, "config.pth"))
     elif cfg.architecture == "LSTM":
         model = LSTMModel(cfg)
@@ -356,7 +332,7 @@ def train_loop(folds, fold, cfg):
     model.to(cfg.device)
 
     optimizer = Adam(model.parameters(), lr=cfg.lr)
-    if cfg.architecture == "ESM2" or cfg.architecture == "SaProt":
+    if cfg.architecture in ["ESM2", "SaProt"]:
         scheduler = CosineAnnealingLR(
             optimizer,
             **{"T_max": 2, "eta_min": 1.0e-6, "last_epoch": -1},
@@ -365,13 +341,9 @@ def train_loop(folds, fold, cfg):
         scheduler = get_cosine_schedule_with_warmup(
             optimizer, num_warmup_steps=0, num_training_steps=cfg.epochs, num_cycles=0.5
         )
-    # use f1_score for classification, mseloss for regression
-    if cfg.task == "classification":
-        criterion = nn.BCEWithLogitsLoss(reduction="mean")
-        best_score = 0
-    elif cfg.task == "regression":
-        criterion = nn.MSELoss(reduction="mean")
-        best_score = float("inf")
+
+    criterion = nn.BCEWithLogitsLoss() if cfg.task == "classification" else nn.MSELoss()
+    best_score = 0 if cfg.task == "classification" else float("inf")
 
     for epoch in range(cfg.epochs):
         start_time = time.time()
@@ -380,6 +352,7 @@ def train_loop(folds, fold, cfg):
             train_loader, model, criterion, optimizer, epoch, cfg
         )
         scheduler.step()
+
         # eval
         val_score, val_score2, predictions = valid_fn(
             valid_loader, model, criterion, cfg
@@ -409,6 +382,7 @@ def train_loop(folds, fold, cfg):
                 model.state_dict(),
                 os.path.join(cfg.output_dir, f"model_fold{fold}.pth"),
             )
+
     predictions = torch.load(
         os.path.join(cfg.output_dir, f"predictions.pth"), map_location="cpu"
     )
@@ -425,7 +399,7 @@ def get_embedding(folds, fold, path):
 
     valid_loader = DataLoader(
         valid_dataset,
-        batch_size=config.batch_size * 4,
+        batch_size=config.batch_size,
         shuffle=False,
         num_workers=config.num_workers,
         pin_memory=True,
@@ -443,7 +417,6 @@ def get_embedding(folds, fold, path):
         with torch.no_grad():
             with torch.cuda.amp.autocast(enabled=config.use_amp):
                 embedding = model.create_embedding(inputs)
-
         embedding_list += embedding.tolist()
 
     torch.cuda.empty_cache()
@@ -460,19 +433,18 @@ if __name__ == "__main__":
         os.makedirs(config.output_dir)
 
     if config.used_sequence == "both":
-        config.max_length = config.max_length + 1
+        config.max_length += 1
 
     LOGGER = get_logger(os.path.join(config.output_dir, "output"))
     config.logger = LOGGER
 
     seed_everything(config.seed)
 
-    train_df = pd.read_csv(config.data_path)
-
-    train_df = train_df.drop_duplicates(
-        subset=[config.sequence_col], keep="first"
-    ).reset_index(drop=True)
-
+    train_df = (
+        pd.read_csv(config.data_path)
+        .drop_duplicates(subset=[config.sequence_col], keep="first")
+        .reset_index(drop=True)
+    )
     train_df["T1/2 [h]"] = train_df[config.target_col]
 
     if config.task == "classification":
@@ -480,7 +452,6 @@ if __name__ == "__main__":
             train_df["T1/2 [h]"] > np.median(train_df["T1/2 [h]"])
         ).astype(int)
         train_df["class"] = train_df["target"]
-
     elif config.task == "regression":
         train_df["log1p(T1/2 [h])"] = np.log1p(train_df["T1/2 [h]"])
         train_df["log1p(T1/2 [h])"] = (
@@ -506,7 +477,7 @@ if __name__ == "__main__":
     for fold, (trn_ind, val_ind) in enumerate(kf.split(train_df, train_df["class"])):
         train_df.loc[val_ind, "fold"] = int(fold)
 
-    if config.architecture == "ESM2" or config.architecture == "SaProt":
+    if config.architecture in ["ESM2", "SaProt"]:
         tokenizer = AutoTokenizer.from_pretrained(
             config.model, padding_side=config.padding_side
         )
@@ -516,7 +487,7 @@ if __name__ == "__main__":
     oof_df = pd.DataFrame()
     for fold in range(config.n_folds):
         _oof_df = train_loop(train_df, fold, config)
-        oof_df = pd.concat([oof_df, _oof_df])
-    oof_df = oof_df.reset_index(drop=True)
+        oof_df = pd.concat([oof_df, _oof_df], axis=0)
 
+    oof_df = oof_df.reset_index(drop=True)
     oof_df.to_pickle(os.path.join(config.output_dir, "oof_df.pkl"))
