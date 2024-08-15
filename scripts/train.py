@@ -140,7 +140,7 @@ def parse_args():
         help="Log print frequency.",
     )
     parser.add_argument(
-        "--fleeze_layer",
+        "--freeze_layer",
         type=int,
         default=-1,
         help="Freeze layers of the model. -1 means no layers are frozen.",
@@ -320,9 +320,9 @@ def train_loop(folds, fold, cfg):
 
     if cfg.architecture in ["ESM2", "SaProt"]:
         model = PLTNUM(cfg)
-        if cfg.fleeze_layer >= 0:
+        if cfg.freeze_layer >= 0:
             for name, param in model.named_parameters():
-                if f"model.encoder.layer.{cfg.fleeze_layer}" in name:
+                if f"model.encoder.layer.{cfg.freeze_layer}" in name:
                     break
                 param.requires_grad = False
         torch.save(model.config, os.path.join(cfg.output_dir, "config.pth"))
