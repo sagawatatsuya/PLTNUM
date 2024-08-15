@@ -17,6 +17,7 @@ def tokenize_input(cfg, text):
         max_length=cfg.max_length,
         padding="max_length",
         truncation=True,
+        return_offsets_mapping=False,
         return_attention_mask=True,
     )
     for k, v in inputs.items():
@@ -57,7 +58,7 @@ class PLTNUMDataset(Dataset):
         inputs = tokenize_input(self.cfg, aas)
         if "target" in data:
             return inputs, torch.tensor(data["target"], dtype=torch.float32)
-        return inputs, None
+        return inputs, np.nan
 
     def _adjust_sequence_length(self, aas):
         max_length = (self.cfg.max_length - 2) * self.cfg.token_length

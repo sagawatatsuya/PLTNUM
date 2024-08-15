@@ -23,7 +23,7 @@ def parse_args():
         help="The path to a model weight which you want to convert.",
     )
     parser.add_argument(
-        "--tokenizer_name_or_path",
+        "--tokenizer_and_config_name_or_path",
         type=str,
         help="The path to a tokenizer of the model which you want to convert.",
     )
@@ -54,11 +54,11 @@ if __name__ == "__main__":
         os.makedirs(config.output_dir)
 
     config.tokenizer = AutoTokenizer.from_pretrained(
-        config.tokenizer_name_or_path, return_tensors="pt"
+        config.tokenizer_and_config_name_or_path, return_tensors="pt"
     )
 
-    model = PLTNUM(config)
-    model.load_state_dict(torch.load(config.model_path, map_location="cpu")["model"])
+    model = PLTNUM(config, config_path=os.path.join(config.tokenizer_and_config_name_or_path, "config.pth"), pretrained=False)
+    model.load_state_dict(torch.load(config.model_path, map_location="cpu"))
 
     model_config = AutoConfig.from_pretrained(config.model)
     config.vocab_size = len(config.tokenizer)

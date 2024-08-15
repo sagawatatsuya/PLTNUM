@@ -1,13 +1,20 @@
+import torch
 import torch.nn as nn
-from transformers import AutoModel, AutoConfig, PreTrainedModel
+from transformers import AutoModel, AutoConfig, PreTrainedModel 
 
 
 class PLTNUM(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg, config_path=None, pretrained=False):
         super(PLTNUM, self).__init__()
         self.cfg = cfg
-        self.config = AutoConfig.from_pretrained(cfg.model, output_hidden_states=True)
-        self.model = AutoModel.from_pretrained(cfg.model, config=self.config)
+        if config_path is None: 
+            self.config = AutoConfig.from_pretrained(cfg.model, output_hidden_states=True)
+        else:
+            self.config = torch.load(config_path)
+        if pretrained:
+            self.model = AutoModel.from_pretrained(cfg.model, config=self.config)
+        else:
+            self.model = AutoModel.from_config(self.config)
 
         self.fc_dropout1 = nn.Dropout(0.8)
         self.fc_dropout2 = nn.Dropout(0.4 if cfg.task == "classification" else 0.8)

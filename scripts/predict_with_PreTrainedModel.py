@@ -44,7 +44,6 @@ def parse_args():
         help="Path to the model for prediction.",
     )
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size.")
-    parser.add_argument("--batch_size", type=int, default=4, help="Batch size.")
     parser.add_argument(
         "--seed",
         type=int,
@@ -115,9 +114,10 @@ def predict(folds, model_path, config):
     )
 
     model = PLTNUM_PreTrainedModel.from_pretrained(model_path, cfg=config)
+    # model.load_state_dict(torch.load(os.path.join(model_path, "pytorch_model.bin"), map_location=config.device))
     model.to(config.device)
 
-    predictions = predict_fn(loader, model, config.device)
+    predictions = predict_fn(loader, model, config)
 
     folds["prediction"] = predictions
     torch.cuda.empty_cache()
@@ -138,10 +138,10 @@ if __name__ == "__main__":
 
     seed_everything(config.seed)
 
-    df = pd.read_csv(config.data_path)
+    df = pd.read_csv(config.data_path)[:100]
 
     tokenizer = AutoTokenizer.from_pretrained(
-        config.model, padding_side=config.padding_side
+        config.model_path, padding_side=config.padding_side
     )
     config.tokenizer = tokenizer
 

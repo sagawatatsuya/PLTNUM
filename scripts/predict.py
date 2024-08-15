@@ -101,12 +101,12 @@ def parse_args():
     return parser.parse_args()
 
 
-def predict_fn(valid_loader, model, device):
+def predict_fn(valid_loader, model, config):
     model.eval()
     predictions = []
 
     for inputs, _ in valid_loader:
-        inputs = inputs.to(device)
+        inputs = inputs.to(config.device)
         with torch.no_grad():
             with torch.cuda.amp.autocast(enabled=config.use_amp):
                 preds = (
@@ -114,6 +114,7 @@ def predict_fn(valid_loader, model, device):
                     if config.task == "classification"
                     else model(inputs)
                 )
+                print(preds)
         predictions += preds.cpu().tolist()
 
     return predictions
@@ -134,7 +135,7 @@ def predict(folds, model_path, config):
     model.load_state_dict(torch.load(model_path, map_location=config.device))
     model.to(config.device)
 
-    predictions = predict_fn(loader, model, config.device)
+    predictions = predict_fn(loader, model, config)
 
     folds["prediction"] = predictions
     torch.cuda.empty_cache()
@@ -155,7 +156,7 @@ if __name__ == "__main__":
 
     seed_everything(config.seed)
 
-    df = pd.read_csv(config.data_path)
+    df = pd.read_csv(config.data_path)[:100]
 
     tokenizer = AutoTokenizer.from_pretrained(
         config.model, padding_side=config.padding_side
