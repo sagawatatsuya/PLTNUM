@@ -10,8 +10,9 @@ from transformers import AutoTokenizer
 
 sys.path.append(".")
 from utils import seed_everything
-from models import PLTNUM
+from models import PLTNUM_PreTrainedModel
 from datasets import PLTNUMDataset
+from predict import predict_fn
 
 
 def parse_args():
@@ -42,6 +43,7 @@ def parse_args():
         required=True,
         help="Path to the model for prediction.",
     )
+    parser.add_argument("--batch_size", type=int, default=4, help="Batch size.")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size.")
     parser.add_argument(
         "--seed",
@@ -101,24 +103,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def predict_fn(valid_loader, model, device):
-    model.eval()
-    predictions = []
-
-    for inputs in valid_loader:
-        inputs = inputs.to(device)
-        with torch.no_grad():
-            with torch.cuda.amp.autocast(enabled=config.use_amp):
-                preds = (
-                    torch.sigmoid(model(inputs))
-                    if config.task == "classification"
-                    else model(inputs)
-                )
-        predictions += preds.cpu().tolist()
-
-    return predictions
-
-
 def predict(folds, model_path, config):
     dataset = PLTNUMDataset(config, folds, train=False, is_test=True)
     loader = DataLoader(
@@ -130,8 +114,7 @@ def predict(folds, model_path, config):
         drop_last=False,
     )
 
-    model = PLTNUM(config)
-    model.load_state_dict(torch.load(model_path, map_location=config.device))
+    model = PLTNUM_PreTrainedModel.from_pretrained(model_path, cfg=config)
     model.to(config.device)
 
     predictions = predict_fn(loader, model, config.device)
@@ -146,7 +129,7 @@ if __name__ == "__main__":
     config = parse_args()
     config.token_length = 2 if config.architecture == "SaProt" else 1
     config.device = "cuda" if torch.cuda.is_available() else "cpu"
-
+    
     if not os.path.exists(config.output_dir):
         os.makedirs(config.output_dir)
 
