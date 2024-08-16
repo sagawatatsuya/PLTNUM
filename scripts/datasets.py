@@ -55,7 +55,10 @@ class PLTNUMDataset(Dataset):
         if self.train:
             aas = self._apply_augmentation(aas)
 
+        aas = aas.replace("__", "<pad>")
+
         inputs = tokenize_input(self.cfg, aas)
+
         if "target" in data:
             return inputs, torch.tensor(data["target"], dtype=torch.float32)
         return inputs, np.nan
@@ -86,7 +89,7 @@ class PLTNUMDataset(Dataset):
             aas = mask_augmentation(aas, self.cfg)
         if random.random() <= self.cfg.truncate_augmentation_prob:
             aas = truncate_augmentation(aas, self.cfg)
-        return aas.replace("__", "<pad>")
+        return aas
 
 
 class LSTMDataset(Dataset):

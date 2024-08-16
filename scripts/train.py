@@ -325,7 +325,7 @@ def train_loop(folds, fold, cfg):
                 if f"model.encoder.layer.{cfg.freeze_layer}" in name:
                     break
                 param.requires_grad = False
-        torch.save(model.config, os.path.join(cfg.output_dir, "config.pth"))
+        model.config.save_pretrained(config.output_dir)
     elif cfg.architecture == "LSTM":
         model = LSTMModel(cfg)
 
@@ -490,4 +490,4 @@ if __name__ == "__main__":
         oof_df = pd.concat([oof_df, _oof_df], axis=0)
 
     oof_df = oof_df.reset_index(drop=True)
-    oof_df.to_pickle(os.path.join(config.output_dir, "oof_df.pkl"))
+    oof_df.to_csv(os.path.join(config.output_dir, "oof_df.csv"), index=False)

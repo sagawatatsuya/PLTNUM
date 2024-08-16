@@ -3,7 +3,7 @@ import sys
 import argparse
 
 import torch
-from transformers import AutoTokenizer, AutoConfig
+import shutil
 
 # Append the utils module path
 sys.path.append("../")
@@ -23,9 +23,9 @@ def parse_args():
         help="The path to a model weight which you want to convert.",
     )
     parser.add_argument(
-        "--tokenizer_and_config_name_or_path",
+        "--config_and_tokenizer_path",
         type=str,
-        help="The path to a tokenizer of the model which you want to convert.",
+        help="The path to a config and tokenizer of the model which you want to convert.",
     )
     parser.add_argument(
         "--model",
@@ -53,16 +53,9 @@ if __name__ == "__main__":
     if not os.path.exists(config.output_dir):
         os.makedirs(config.output_dir)
 
-    config.tokenizer = AutoTokenizer.from_pretrained(
-        config.tokenizer_and_config_name_or_path, return_tensors="pt"
-    )
-
-    model = PLTNUM(config, config_path=os.path.join(config.tokenizer_and_config_name_or_path, "config.pth"), pretrained=False)
+    model = PLTNUM(config)
     model.load_state_dict(torch.load(config.model_path, map_location="cpu"))
 
-    model_config = AutoConfig.from_pretrained(config.model)
-    config.vocab_size = len(config.tokenizer)
-
-    config.tokenizer.save_pretrained(config.output_dir)
     torch.save(model.state_dict(), os.path.join(config.output_dir, "pytorch_model.bin"))
-    model_config.save_pretrained(config.output_dir)
+    for filename in ["config.json", "special_tokens_map.json", "tokenizer_config.json", "vocab.txt"]:
+        shutil.copy(os.path.join(config.config_and_tokenizer_path, filename), os.path.join(config.output_dir, filename))

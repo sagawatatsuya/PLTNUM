@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     seed_everything(config.seed)
 
-    df = pd.read_csv(config.data_path)[:100]
+    df = pd.read_csv(config.data_path)
 
     tokenizer = AutoTokenizer.from_pretrained(
         config.model_path, padding_side=config.padding_side
