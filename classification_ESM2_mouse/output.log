@@ -838,3 +838,9 @@ Epoch 9 - avg_train_loss: 0.0463  train_acc: 0.9834  valid_acc: 0.6779  valid_f1
 Epoch: [10][0/936] Elapsed 0m 0s (remain 6m 6s) Loss: 0.0351(0.0351) LR: 0.00001050 Accuracy: 1.0000 
 Epoch: [10][300/936] Elapsed 1m 6s (remain 2m 19s) Loss: 0.0079(0.0652) LR: 0.00001050 Accuracy: 0.9826 
 Epoch: [10][600/936] Elapsed 2m 11s (remain 1m 13s) Loss: 0.0041(0.0600) LR: 0.00001050 Accuracy: 0.9817 
+Epoch: [10][900/936] Elapsed 3m 17s (remain 0m 7s) Loss: 0.0023(0.0506) LR: 0.00001050 Accuracy: 0.9845 
+Epoch: [10][935/936] Elapsed 3m 25s (remain 0m 0s) Loss: 0.0045(0.0495) LR: 0.00001050 Accuracy: 0.9845 
+EVAL: [0/104] Elapsed 0m 0s (remain 0m 26s) Loss: 0.3142(0.3142) accuracy: 1.0000 f1 score: 1.0
+EVAL: [103/104] Elapsed 0m 5s (remain 0m 0s) Loss: 0.7007(0.6602) accuracy: 0.6587 f1 score: 0.6551385937463512
+Epoch 10 - avg_train_loss: 0.0495  train_acc: 0.9845  valid_acc: 0.6587  valid_f1: 0.6551  time: 211s
+[Fold9] Best score: 0.6839547413168166

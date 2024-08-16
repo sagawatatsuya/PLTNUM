@@ -1,5 +1,5 @@
 {
-  "_name_or_path": "/home2/sagawa/PLTNUM/classification_automodel",
+  "_name_or_path": "facebook/esm2_t33_650M_UR50D",
   "architectures": [
     "EsmForMaskedLM"
   ],
@@ -19,12 +19,13 @@
   "model_type": "esm",
   "num_attention_heads": 20,
   "num_hidden_layers": 33,
+  "output_hidden_states": true,
   "pad_token_id": 1,
   "position_embedding_type": "rotary",
   "token_dropout": true,
   "torch_dtype": "float32",
-  "transformers_version": "4.38.1",
+  "transformers_version": "4.38.2",
   "use_cache": true,
   "vocab_list": null,
-  "vocab_size": 35
+  "vocab_size": 33
 }
