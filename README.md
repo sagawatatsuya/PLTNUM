@@ -1,26 +1,60 @@
-# PLTNUM
-model description
+# PLTNUM: Protein LifeTime Neural Model
+PLTNUM is a protein language model designed to predict protein half-life from amino acid sequences. It is built upon the [SaProt](https://huggingface.co/westlake-repl/SaProt_650M_AF2) model and trained using data from [Peptide Level Turnover Measurements Enable the Study of Proteoform Dynamics](https://www.nature.com/articles/nature10098) dataset, which is a protein half-life dataset obtained using mass spectrometry and SILAC.  
+PLTNUM not only achieves high accuracy in predicting protein half-life but also leverages SHAP analysis to pinpoint specific amino acid residues that significantly influence the prediction. 
 
 ![model image](https://github.com/sagawatatsuya/PLTNUM/blob/main/model-image.png)
 
 - [PLTNUM](#pltnum)  
   - [Installation](#installation)  
   - [Usage](#usage)  
-  - [Fine-tuning](#fine-tuning)  
+  - [Train](#train)  
   - [Structure](#structure) 
   - [Authors](#authors)
   - [Citation](#citation)  
 
 
 ## Installation
+You can create a new conda environment with the required dependencies using the following commands:
 ```bash
 git clone https://github.com/sagawatatsuya/PLTNUM.git
 cd PLTNUM
 conda env create -f environment.yml
 ```
+Or you can install the required dependencies using conda:
+```bash
+conda create --name pltnum python=3.11.8
+conda activate pltnum
+conda install anaconda::requests
+conda install conda-forge::biopython
+conda install anaconda::pandas
+conda install anaconda::numpy
+conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+conda install anaconda::scikit-learn
+conda install conda-forge::transformers
+conda install -c conda-forge shap
+```
 
 ## Usage
+1. foldseekを使用してpdbファイルからstracture aware aa sequenceを作成する。
+2. 作成した配列を基にprediction
+3. 作成した配列を基にSHAP計算
 
+## Train
+
+## Structure
+```
+PLTNUM/  
+├── bin/            # Foldseek's binary file  
+├── data/           # Datasets  
+├── pdb_files/      # PDB files  
+├── scripts/        # Scripts for training and prediction, etc.
+└── README.md       # This README file  
+```
+
+## Authors
+Tatsuya Sagawa, Eisuke Kanao, and Yasushi Ishihama  
+
+## Citation
 
 
 1. 
@@ -66,36 +100,6 @@ python scripts/predict.py \
     --task="classification" \
     --sequence_col="aa_foldseek"
 ```
-```
-python scripts/predict.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="facebook/esm2_t33_650M_UR50D" \
-    --model_path="/home2/sagawa/PLTNUM/classification/model_fold0.pth" \
-    --architecture="ESM2" \
-    --batch_size=64 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --output_dir="data" \
-    --task="classification" \
-    --sequence_col="aa"
-```
-```
-python scripts/predict.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --model_path="/home2/sagawa/PLTNUM/regression/model_fold0.pth" \
-    --architecture="SaProt" \
-    --batch_size=64 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --output_dir="data" \
-    --task="regression" \
-    --sequence_col="aa_foldseek"
-```
 
 
 
@@ -104,9 +108,16 @@ python scripts/predict.py \
 ```
 python scripts/convert_to_PreTrainedModel.py \
     --model_path="/home2/sagawa/PLTNUM/classification_ESM2_mouse/model_fold0.pth" \
-    --tokenizer_and_config_name_or_path="/home2/sagawa/PLTNUM/classification_ESM2_mouse" \
+    --config_and_tokenizer_path="/home2/sagawa/PLTNUM/classification_ESM2_mouse" \
     --model="facebook/esm2_t33_650M_UR50D" \
     --output_dir="/home2/sagawa/PLTNUM/classification_ESM2_mouse_converted"
+```
+```
+python scripts/convert_to_PreTrainedModel.py \
+    --model_path="/home2/sagawa/PLTNUM/classification_PLTNUM_mouse/model_fold0.pth" \
+    --config_and_tokenizer_path="/home2/sagawa/PLTNUM/classification_PLTNUM_mouse" \
+    --model="westlake-repl/SaProt_650M_AF2" \
+    --output_dir="/home2/sagawa/PLTNUM/classification_PLTNUM_mouse_converted"
 ```
 
 ### Prediction with PreTrainedModel
@@ -159,15 +170,6 @@ python scripts/predict.py \
 
 
 
-### Run Foldseek
-```
-python scripts/use_foldseek_for_uniprot.py  \
-    --file_path="data/41586_2011_BFnature10098_MOESM304_ESM.xls" \
-    --sheet_name="Sheet1" \
-    --pdb_dir="/home2/sagawa/protein-half-life-prediction/PHLprediction/UP000000589_10090_MOUSE_v4" \
-    --uniprotids_column="Uniprot IDs" \
-    --num_processes=4
-```
 
 ### Train PLTNUM regression
 ```
@@ -294,8 +296,107 @@ CUDA_VISIBLE_DEVICES=1 python scripts/train.py \
     --sequence_col="aa_foldseek"
 ```
 
-
-コードの変更でバグが起こらないか確認
+126長の学習しなおし
+```
+CUDA_VISIBLE_DEVICES=0 python scripts/train.py \
+    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
+    --model="westlake-repl/SaProt_650M_AF2" \
+    --architecture="SaProt" \
+    --lr=2e-5 \
+    --epochs=10 \
+    --batch_size=4 \
+    --use_amp \
+    --num_workers=4 \
+    --max_length=128 \
+    --used_sequence="left" \
+    --mask_ratio=0.05 \
+    --mask_prob=0.2 \
+    --n_folds=10 \
+    --output_dir="./classification_PLTNUM_mouse_128_L/" \
+    --task="classification" \
+    --target_col="Protein half-life average [h]" \
+    --sequence_col="aa_foldseek"
+```
+```
+CUDA_VISIBLE_DEVICES=1 python scripts/train.py \
+    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
+    --model="westlake-repl/SaProt_650M_AF2" \
+    --architecture="SaProt" \
+    --lr=2e-5 \
+    --epochs=10 \
+    --batch_size=4 \
+    --use_amp \
+    --num_workers=4 \
+    --max_length=128 \
+    --used_sequence="right" \
+    --mask_ratio=0.05 \
+    --mask_prob=0.2 \
+    --n_folds=10 \
+    --output_dir="./classification_PLTNUM_mouse_128_R/" \
+    --task="classification" \
+    --target_col="Protein half-life average [h]" \
+    --sequence_col="aa_foldseek"
+```
+```
+CUDA_VISIBLE_DEVICES=2 python scripts/train.py \
+    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
+    --model="westlake-repl/SaProt_650M_AF2" \
+    --architecture="SaProt" \
+    --lr=2e-5 \
+    --epochs=10 \
+    --batch_size=4 \
+    --use_amp \
+    --num_workers=4 \
+    --max_length=128 \
+    --used_sequence="both" \
+    --mask_ratio=0.05 \
+    --mask_prob=0.2 \
+    --n_folds=10 \
+    --output_dir="./classification_PLTNUM_mouse_128_B/" \
+    --task="classification" \
+    --target_col="Protein half-life average [h]" \
+    --sequence_col="aa_foldseek"
+```
+```
+CUDA_VISIBLE_DEVICES=0 python scripts/train.py \
+    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
+    --model="westlake-repl/SaProt_650M_AF2" \
+    --architecture="SaProt" \
+    --lr=2e-5 \
+    --epochs=10 \
+    --batch_size=4 \
+    --use_amp \
+    --num_workers=4 \
+    --max_length=128 \
+    --used_sequence="internal" \
+    --mask_ratio=0.05 \
+    --mask_prob=0.2 \
+    --n_folds=10 \
+    --output_dir="./classification_PLTNUM_mouse_128_I/" \
+    --task="classification" \
+    --target_col="Protein half-life average [h]" \
+    --sequence_col="aa_foldseek"
+```
+```
+CUDA_VISIBLE_DEVICES=1 python scripts/train.py \
+    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
+    --model="facebook/esm2_t33_650M_UR50D" \
+    --architecture="ESM2" \
+    --lr=2e-5 \
+    --epochs=10 \
+    --batch_size=4 \
+    --use_amp \
+    --num_workers=4 \
+    --max_length=128 \
+    --used_sequence="left" \
+    --mask_ratio=0.05 \
+    --mask_prob=0.2 \
+    --n_folds=10 \
+    --output_dir="./classification_ESM2_mouse_128_L/" \
+    --task="classification" \
+    --target_col="Protein half-life average [h]" \
+    --sequence_col="aa"
+```
 ```
 CUDA_VISIBLE_DEVICES=2 python scripts/train.py \
     --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
@@ -306,12 +407,12 @@ CUDA_VISIBLE_DEVICES=2 python scripts/train.py \
     --batch_size=4 \
     --use_amp \
     --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
+    --max_length=128 \
+    --used_sequence="right" \
     --mask_ratio=0.05 \
     --mask_prob=0.2 \
     --n_folds=10 \
-    --output_dir="./classification_ESM2_mouse_debug/" \
+    --output_dir="./classification_ESM2_mouse_128_R/" \
     --task="classification" \
     --target_col="Protein half-life average [h]" \
     --sequence_col="aa"
