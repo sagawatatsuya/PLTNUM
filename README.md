@@ -1,5 +1,5 @@
 # PLTNUM: Protein LifeTime Neural Model
-PLTNUM is a protein language model designed to predict protein half-life from amino acid sequences. It is built upon the [SaProt](https://huggingface.co/westlake-repl/SaProt_650M_AF2) model and trained using data from [Peptide Level Turnover Measurements Enable the Study of Proteoform Dynamics](https://www.nature.com/articles/nature10098) dataset, which is a protein half-life dataset obtained using mass spectrometry and SILAC.  
+PLTNUM is a protein language model designed to predict protein half-life from amino acid sequences. It is built upon the [SaProt](https://huggingface.co/westlake-repl/SaProt_650M_AF2) model and trained using data from [Schwanhäusser, B et al. Nature. 2011](https://www.nature.com/articles/nature10098) dataset, which is a protein half-life dataset obtained using mass spectrometry and SILAC.  
 PLTNUM not only achieves high accuracy in predicting protein half-life but also leverages SHAP analysis to pinpoint specific amino acid residues that significantly influence the prediction. 
 
 ![model image](https://github.com/sagawatatsuya/PLTNUM/blob/main/model-image.png)
