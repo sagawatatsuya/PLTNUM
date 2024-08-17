@@ -101,17 +101,17 @@ def parse_args():
     return parser.parse_args()
 
 
-def predict_fn(valid_loader, model, config):
+def predict_fn(valid_loader, model, cfg):
     model.eval()
     predictions = []
 
     for inputs, _ in valid_loader:
-        inputs = inputs.to(config.device)
+        inputs = inputs.to(cfg.device)
         with torch.no_grad():
-            with torch.cuda.amp.autocast(enabled=config.use_amp):
+            with torch.cuda.amp.autocast(enabled=cfg.use_amp):
                 preds = (
                     torch.sigmoid(model(inputs))
-                    if config.task == "classification"
+                    if cfg.task == "classification"
                     else model(inputs)
                 )
         predictions += preds.cpu().tolist()
@@ -119,22 +119,22 @@ def predict_fn(valid_loader, model, config):
     return predictions
 
 
-def predict(folds, model_path, config):
-    dataset = PLTNUMDataset(config, folds, train=False)
+def predict(folds, model_path, cfg):
+    dataset = PLTNUMDataset(cfg, folds, train=False)
     loader = DataLoader(
         dataset,
-        batch_size=config.batch_size,
+        batch_size=cfg.batch_size,
         shuffle=False,
-        num_workers=config.num_workers,
+        num_workers=cfg.num_workers,
         pin_memory=True,
         drop_last=False,
     )
 
-    model = PLTNUM(config)
-    model.load_state_dict(torch.load(model_path, map_location=config.device))
-    model.to(config.device)
+    model = PLTNUM(cfg)
+    model.load_state_dict(torch.load(model_path, map_location=cfg.device))
+    model.to(cfg.device)
 
-    predictions = predict_fn(loader, model, config)
+    predictions = predict_fn(loader, model, cfg)
 
     folds["prediction"] = predictions
     torch.cuda.empty_cache()

@@ -135,7 +135,6 @@ python scripts/predict_with_PreTrainedModel.py \
     --task="classification" \
     --sequence_col="aa"
 ```
-
 ```
 python scripts/predict.py \
     --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
@@ -162,37 +161,6 @@ python scripts/predict.py \
 
 
 
-
-
-
-
-
-
-
-
-
-### Train PLTNUM regression
-```
-python scripts/train.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --architecture="SaProt" \
-    --lr=2e-5 \
-    --epochs=3 \
-    --batch_size=4 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --mask_ratio=0.05 \
-    --mask_prob=0.1 \
-    --n_folds=10 \
-    --output_dir="./regression/" \
-    --task="regression" \
-    --target_col="Protein half-life average [h]" \
-    --sequence_col="aa_foldseek"
-```
-
 ### Train PLTNUM classification
 ```
 python scripts/train.py \
@@ -217,7 +185,7 @@ python scripts/train.py \
 
 ### Train LSTM classification
 ```
-CUDA_VISIBLE_DEVICES=2 python scripts/train_LSTM.py \
+python scripts/train_LSTM.py \
     --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
     --model="LSTM" \
     --architecture="LSTM" \
@@ -233,23 +201,6 @@ CUDA_VISIBLE_DEVICES=2 python scripts/train_LSTM.py \
     --task="classification" \
     --target_col="Protein half-life average [h]" \
     --sequence_col="aa"
-```
-
-### Prediction
-```
-python scripts/predict.py \
-    --data_path="/home2/sagawa/protein-half-life-prediction/Peptide_Level_Turnover_Measurements_Enable_the_Study_of_Proteoform_Dynamics/train_foldseek.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --model_path="/home2/sagawa/protein-half-life-prediction/ver20_56/model_ver20_56_fold0.pth" \
-    --architecture="SaProt" \
-    --batch_size=64 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --output_dir="./Peptide_Level_Turnover_Measurements_Enable_the_Study_of_Proteoform_Dynamics_prediction_result/" \
-    --task="classification" \
-    --sequence_col="aa_foldseek"
 ```
 
 最終的な学習しなおし
@@ -276,7 +227,7 @@ python scripts/train.py \
 ```
 ### Train PLTNUM classification Mouse
 ```
-CUDA_VISIBLE_DEVICES=1 python scripts/train.py \
+python scripts/train.py \
     --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
     --model="westlake-repl/SaProt_650M_AF2" \
     --architecture="SaProt" \
@@ -295,91 +246,10 @@ CUDA_VISIBLE_DEVICES=1 python scripts/train.py \
     --target_col="Protein half-life average [h]" \
     --sequence_col="aa_foldseek"
 ```
-
-126長の学習しなおし
+### Train ESM classification Human
 ```
-CUDA_VISIBLE_DEVICES=0 python scripts/train.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --architecture="SaProt" \
-    --lr=2e-5 \
-    --epochs=10 \
-    --batch_size=4 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=128 \
-    --used_sequence="left" \
-    --mask_ratio=0.05 \
-    --mask_prob=0.2 \
-    --n_folds=10 \
-    --output_dir="./classification_PLTNUM_mouse_128_L/" \
-    --task="classification" \
-    --target_col="Protein half-life average [h]" \
-    --sequence_col="aa_foldseek"
-```
-```
-CUDA_VISIBLE_DEVICES=1 python scripts/train.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --architecture="SaProt" \
-    --lr=2e-5 \
-    --epochs=10 \
-    --batch_size=4 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=128 \
-    --used_sequence="right" \
-    --mask_ratio=0.05 \
-    --mask_prob=0.2 \
-    --n_folds=10 \
-    --output_dir="./classification_PLTNUM_mouse_128_R/" \
-    --task="classification" \
-    --target_col="Protein half-life average [h]" \
-    --sequence_col="aa_foldseek"
-```
-```
-CUDA_VISIBLE_DEVICES=2 python scripts/train.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --architecture="SaProt" \
-    --lr=2e-5 \
-    --epochs=10 \
-    --batch_size=4 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=128 \
-    --used_sequence="both" \
-    --mask_ratio=0.05 \
-    --mask_prob=0.2 \
-    --n_folds=10 \
-    --output_dir="./classification_PLTNUM_mouse_128_B/" \
-    --task="classification" \
-    --target_col="Protein half-life average [h]" \
-    --sequence_col="aa_foldseek"
-```
-```
-CUDA_VISIBLE_DEVICES=0 python scripts/train.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --architecture="SaProt" \
-    --lr=2e-5 \
-    --epochs=10 \
-    --batch_size=4 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=128 \
-    --used_sequence="internal" \
-    --mask_ratio=0.05 \
-    --mask_prob=0.2 \
-    --n_folds=10 \
-    --output_dir="./classification_PLTNUM_mouse_128_I/" \
-    --task="classification" \
-    --target_col="Protein half-life average [h]" \
-    --sequence_col="aa_foldseek"
-```
-```
-CUDA_VISIBLE_DEVICES=1 python scripts/train.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
+python scripts/train.py \
+    --data_path="/home2/sagawa/protein-half-life-prediction/Peptide_Level_Turnover_Measurements_Enable_the_Study_of_Proteoform_Dynamics/train_foldseek_target_cleaned.csv" \
     --model="facebook/esm2_t33_650M_UR50D" \
     --architecture="ESM2" \
     --lr=2e-5 \
@@ -387,33 +257,34 @@ CUDA_VISIBLE_DEVICES=1 python scripts/train.py \
     --batch_size=4 \
     --use_amp \
     --num_workers=4 \
-    --max_length=128 \
+    --max_length=512 \
     --used_sequence="left" \
     --mask_ratio=0.05 \
     --mask_prob=0.2 \
     --n_folds=10 \
-    --output_dir="./classification_ESM2_mouse_128_L/" \
+    --output_dir="./classification_ESM2_human/" \
     --task="classification" \
-    --target_col="Protein half-life average [h]" \
+    --target_col="T1/2 [h]" \
     --sequence_col="aa"
 ```
+### Train PLTNUM classification Human
 ```
-CUDA_VISIBLE_DEVICES=2 python scripts/train.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="facebook/esm2_t33_650M_UR50D" \
-    --architecture="ESM2" \
+python scripts/train.py \
+    --data_path="/home2/sagawa/protein-half-life-prediction/Peptide_Level_Turnover_Measurements_Enable_the_Study_of_Proteoform_Dynamics/train_foldseek_target_cleaned.csv" \
+    --model="westlake-repl/SaProt_650M_AF2" \
+    --architecture="SaProt" \
     --lr=2e-5 \
     --epochs=10 \
     --batch_size=4 \
     --use_amp \
     --num_workers=4 \
-    --max_length=128 \
-    --used_sequence="right" \
+    --max_length=512 \
+    --used_sequence="left" \
     --mask_ratio=0.05 \
     --mask_prob=0.2 \
     --n_folds=10 \
-    --output_dir="./classification_ESM2_mouse_128_R/" \
+    --output_dir="./classification_PLTNUM_human/" \
     --task="classification" \
-    --target_col="Protein half-life average [h]" \
-    --sequence_col="aa"
+    --target_col="T1/2 [h]" \
+    --sequence_col="aa_foldseek"
 ```

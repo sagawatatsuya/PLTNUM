@@ -844,3 +844,5 @@ EVAL: [0/104] Elapsed 0m 0s (remain 0m 26s) Loss: 0.3142(0.3142) accuracy: 1.000
 EVAL: [103/104] Elapsed 0m 5s (remain 0m 0s) Loss: 0.7007(0.6602) accuracy: 0.6587 f1 score: 0.6551385937463512
 Epoch 10 - avg_train_loss: 0.0495  train_acc: 0.9845  valid_acc: 0.6587  valid_f1: 0.6551  time: 211s
 [Fold9] Best score: 0.6839547413168166
+================== fold: 0 training ======================
+Epoch: [1][0/1109] Elapsed 0m 1s (remain 21m 28s) Loss: 0.6608(0.6608) LR: 0.00002000 Accuracy: 0.5000

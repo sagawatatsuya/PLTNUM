@@ -325,7 +325,7 @@ def train_loop(folds, fold, cfg):
                 if f"model.encoder.layer.{cfg.freeze_layer}" in name:
                     break
                 param.requires_grad = False
-        model.config.save_pretrained(config.output_dir)
+        model.config.save_pretrained(cfg.output_dir)
     elif cfg.architecture == "LSTM":
         model = LSTMModel(cfg)
 
@@ -393,20 +393,20 @@ def train_loop(folds, fold, cfg):
     return valid_folds
 
 
-def get_embedding(folds, fold, path):
+def get_embedding(folds, fold, path, cfg):
     valid_folds = folds[folds["fold"] == fold].reset_index(drop=True)
-    valid_dataset = PLTNUMDataset(config, valid_folds, train=False)
+    valid_dataset = PLTNUMDataset(cfg, valid_folds, train=False)
 
     valid_loader = DataLoader(
         valid_dataset,
-        batch_size=config.batch_size,
+        batch_size=cfg.batch_size,
         shuffle=False,
-        num_workers=config.num_workers,
+        num_workers=cfg.num_workers,
         pin_memory=True,
         drop_last=False,
     )
 
-    model = PLTNUM(config)
+    model = PLTNUM(cfg)
     model.load_state_dict(torch.load(path, map_location=torch.device("cpu")))
     model.to(device)
 
@@ -415,7 +415,7 @@ def get_embedding(folds, fold, path):
     for inputs, _ in valid_loader:
         inputs = inputs.to(device)
         with torch.no_grad():
-            with torch.cuda.amp.autocast(enabled=config.use_amp):
+            with torch.cuda.amp.autocast(enabled=cfg.use_amp):
                 embedding = model.create_embedding(inputs)
         embedding_list += embedding.tolist()
 

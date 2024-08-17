@@ -7,7 +7,8 @@ class PLTNUM(nn.Module):
         super(PLTNUM, self).__init__()
         self.cfg = cfg
         self.config = AutoConfig.from_pretrained(cfg.model, output_hidden_states=True)
-        self.model = AutoModel.from_pretrained(cfg.model, config=self.config)
+        # self.model = AutoModel.from_pretrained(cfg.model, config=self.config)
+        self.model = AutoModel.from_config(config=self.config)
 
         self.fc_dropout1 = nn.Dropout(0.8)
         self.fc_dropout2 = nn.Dropout(0.4 if cfg.task == "classification" else 0.8)

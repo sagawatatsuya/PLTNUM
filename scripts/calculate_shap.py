@@ -87,20 +87,20 @@ def parse_args():
     return parser.parse_args()
 
 
-def calculate_shap_fn(texts, config):
+def calculate_shap_fn(texts, model, cfg):
     if len(texts) == 1:
         texts = texts[0]
     else:
         texts = texts.tolist()
 
-    inputs = tokenizer(
+    inputs = cfg.tokenizer(
         texts,
         return_tensors="pt",
         padding=True,
         truncation=True,
-        max_length=config.max_length,
+        max_length=cfg.max_length,
     )
-    inputs = {k: v.to(config.device) for k, v in inputs.items()}
+    inputs = {k: v.to(cfg.device) for k, v in inputs.items()}
     with torch.no_grad():
         outputs = model(inputs)
         outputs = torch.sigmoid(outputs).detach().cpu().numpy()
@@ -131,7 +131,7 @@ if __name__ == "__main__":
             df_fold = df[df["fold"] == fold].reset_index(drop=True)
 
             # build an explainer using a token masker
-            explainer = shap.Explainer(lambda x: calculate_shap_fn(x, config), config.tokenizer)
+            explainer = shap.Explainer(lambda x: calculate_shap_fn(x, model, config), config.tokenizer)
 
             shap_values = explainer(
                 df_fold[config.sequence_col].values.tolist(),
@@ -146,7 +146,7 @@ if __name__ == "__main__":
         model.eval()
 
         # build an explainer using a token masker
-        explainer = shap.Explainer(lambda x: calculate_shap_fn(x, config), config.tokenizer)
+        explainer = shap.Explainer(lambda x: calculate_shap_fn(x, model, config), config.tokenizer)
 
         shap_values = explainer(
             df[config.sequence_col].values.tolist(),

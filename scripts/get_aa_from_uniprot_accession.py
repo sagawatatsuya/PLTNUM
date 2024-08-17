@@ -40,9 +40,10 @@ def parse_args():
     return parser.parse_args()
 
 
-def fetch_sequence(row):
+def fetch_sequence(row, cfg):
     try:
-        uniprot_id = row[config.uniprotid_column]
+        baseURL = "http://www.uniprot.org/uniprot/"
+        uniprot_id = row[cfg.uniprotid_column]
         URL = baseURL + uniprot_id + ".fasta"
         response = r.post(URL)
         Data = "".join(response.text)
@@ -53,14 +54,13 @@ def fetch_sequence(row):
         return None
 
 
-def process_rows(df_chunk):
-    return [fetch_sequence(row) for idx, row in df_chunk.iterrows()]
+def process_rows(df_chunk, cfg):
+    return [fetch_sequence(row, cfg) for idx, row in df_chunk.iterrows()]
 
 
 if __name__ == "__main__":
     config = parse_args()
 
-    baseURL = "http://www.uniprot.org/uniprot/"
 
     if config.file_path.endswith(".xls"):
         df = pd.read_excel(
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     df_split = np.array_split(df, config.num_processes)
 
     with mp.Pool(processes=config.num_processes) as pool:
-        results = pool.map(process_rows, df_split)
+        results = pool.map(lambda x: process_rows(x, config), df_split)
 
     aas = [seq for result in results for seq in result]
 

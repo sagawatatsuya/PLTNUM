@@ -102,22 +102,22 @@ def parse_args():
     return parser.parse_args()
 
 
-def predict(folds, model_path, config):
-    dataset = PLTNUMDataset(config, folds, train=False)
+def predict(folds, model_path, cfg):
+    dataset = PLTNUMDataset(cfg, folds, train=False)
     loader = DataLoader(
         dataset,
-        batch_size=config.batch_size,
+        batch_size=cfg.batch_size,
         shuffle=False,
-        num_workers=config.num_workers,
+        num_workers=cfg.num_workers,
         pin_memory=True,
         drop_last=False,
     )
 
-    model = PLTNUM_PreTrainedModel.from_pretrained(model_path, cfg=config)
-    # model.load_state_dict(torch.load(os.path.join(model_path, "pytorch_model.bin"), map_location=config.device))
-    model.to(config.device)
+    model = PLTNUM_PreTrainedModel.from_pretrained(model_path, cfg=cfg)
+    # model.load_state_dict(torch.load(os.path.join(model_path, "pytorch_model.bin"), map_location=cfg.device))
+    model.to(cfg.device)
 
-    predictions = predict_fn(loader, model, config)
+    predictions = predict_fn(loader, model, cfg)
 
     folds["prediction"] = predictions
     torch.cuda.empty_cache()
