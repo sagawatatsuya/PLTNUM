@@ -119,6 +119,20 @@ python scripts/convert_to_PreTrainedModel.py \
     --model="westlake-repl/SaProt_650M_AF2" \
     --output_dir="/home2/sagawa/PLTNUM/classification_PLTNUM_mouse_converted"
 ```
+```
+python scripts/convert_to_PreTrainedModel.py \
+    --model_path="/home2/sagawa/PLTNUM/classification_ESM2_human/model_fold0.pth" \
+    --config_and_tokenizer_path="/home2/sagawa/PLTNUM/classification_ESM2_human" \
+    --model="facebook/esm2_t33_650M_UR50D" \
+    --output_dir="/home2/sagawa/PLTNUM/classification_ESM2_human_converted"
+```
+```
+python scripts/convert_to_PreTrainedModel.py \
+    --model_path="/home2/sagawa/PLTNUM/classification_PLTNUM_human/model_fold0.pth" \
+    --config_and_tokenizer_path="/home2/sagawa/PLTNUM/classification_PLTNUM_human" \
+    --model="westlake-repl/SaProt_650M_AF2" \
+    --output_dir="/home2/sagawa/PLTNUM/classification_PLTNUM_human_converted"
+```
 
 ### Prediction with PreTrainedModel
 ```
