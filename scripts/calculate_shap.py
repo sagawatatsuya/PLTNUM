@@ -9,7 +9,7 @@ import shap
 
 sys.path.append(".")
 from utils import seed_everything, save_pickle
-from models import PLTNUM
+from models import PLTNUM, PLTNUM_PreTrainedModel
 
 
 def parse_args():
@@ -143,8 +143,7 @@ if __name__ == "__main__":
 
             save_pickle(os.path.join(config.output_dir, f"shap_values_fold{fold}.pickle"), shap_values)
     else:
-        model = PLTNUM(config).to(config.device)
-        model.load_state_dict(torch.load(config.model_path, map_location="cpu"))
+        model = PLTNUM_PreTrainedModel.from_pretrained(config.model_path, cfg=config).to(config.device)
         model.eval()
 
         # build an explainer using a token masker

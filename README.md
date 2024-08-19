@@ -58,10 +58,40 @@ python scripts/predict_with_PreTrainedModel.py \
     --sequence_col="aa_foldseek"
 ```
 
-2. 作成した配列を基にprediction
-3. 作成した配列を基にSHAP計算
+### 3. 作成した配列を基にSHAP計算
+```
+python scripts/calculate_shap.py \
+    --data_path="data/demo_input.csv" \
+    --model="facebook/esm2_t33_650M_UR50D" \
+    --model_path="sagawa/PLTNUM-SaProt-NIH3T3" \
+    --architecture="SaProt" \
+    --batch_size=512 \
+    --output_dir="output" \
+    --sequence_col="aa_foldseek" \
+    --max_evals=2
+```
 
 ## Train
+```
+python scripts/train.py \
+    --data_path="data/demo_input.csv" \
+    --model="westlake-repl/SaProt_650M_AF2" \
+    --architecture="SaProt" \
+    --lr=2e-5 \
+    --epochs=10 \
+    --batch_size=4 \
+    --use_amp \
+    --num_workers=4 \
+    --max_length=512 \
+    --used_sequence="left" \
+    --mask_ratio=0.05 \
+    --mask_prob=0.2 \
+    --n_folds=10 \
+    --output_dir="./classification_PLTNUM_mouse/" \
+    --task="classification" \
+    --target_col="T1/2 [h]" \
+    --sequence_col="aa_foldseek"
+```
 
 ## Structure
 ```
@@ -77,68 +107,3 @@ PLTNUM/
 Tatsuya Sagawa, Eisuke Kanao, and Yasushi Ishihama  
 
 ## Citation
-
-
-3. 
-mouseのpdbファイルダウンロード
-https://ftp.ebi.ac.uk/pub/databases/alphafold/latest/UP000000589_10090_MOUSE_v4.tar
-
-4. 
-foldseekを適用
-https://drive.google.com/file/d/1B_9t3n_nlj8Y3Kpc_mMjtMdY0OPYa7Re/viewからfoldseekをダウンロードし、bin下に置く
-chmod 777 bin/foldseek
-
-
-
-
-最終的な学習しなおし
-### Train PLTNUM classification Mouse
-```
-python scripts/train.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --architecture="SaProt" \
-    --lr=2e-5 \
-    --epochs=10 \
-    --batch_size=4 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --mask_ratio=0.05 \
-    --mask_prob=0.2 \
-    --n_folds=10 \
-    --output_dir="./classification_PLTNUM_mouse/" \
-    --task="classification" \
-    --target_col="Protein half-life average [h]" \
-    --sequence_col="aa_foldseek"
-```
-
-
-### SHAP
-```
-python scripts/calculate_shap.py \
-    --data_path="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse/oof_df.csv" \
-    --model="facebook/esm2_t33_650M_UR50D" \
-    --model_path="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse" \
-    --architecture="ESM2" \
-    --folds=10 \
-    --do_cross_validation \
-    --batch_size=128 \
-    --max_length=512 \
-    --output_dir="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse/cross_validation" \
-    --sequence_col="aa" \
-    --max_evals=2
-```
-```
-python scripts/calculate_shap.py \
-    --data_path="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse/oof_df.csv" \
-    --model="facebook/esm2_t33_650M_UR50D" \
-    --model_path="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse/model_fold0.pth" \
-    --architecture="ESM2" \
-    --batch_size=512 \
-    --max_length=512 \
-    --output_dir="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse/no_cross_validation" \
-    --sequence_col="aa" \
-    --max_evals=2
-```
