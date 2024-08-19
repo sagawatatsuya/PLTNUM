@@ -79,10 +79,6 @@ Tatsuya Sagawa, Eisuke Kanao, and Yasushi Ishihama
 ## Citation
 
 
-1. 
-https://static-content.springer.com/esm/art%3A10.1038%2Fnature10098/MediaObjects/41586_2011_BFnature10098_MOESM304_ESM.xls
-をダウンロードする
-
 3. 
 mouseのpdbファイルダウンロード
 https://ftp.ebi.ac.uk/pub/databases/alphafold/latest/UP000000589_10090_MOUSE_v4.tar
@@ -95,52 +91,7 @@ chmod 777 bin/foldseek
 
 
 
-### Prediction with PreTrainedModel
-
-
-
-### Train LSTM classification
-```
-python scripts/train_LSTM.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="LSTM" \
-    --architecture="LSTM" \
-    --lr=2e-5 \
-    --epochs=10 \
-    --batch_size=32 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --n_folds=10 \
-    --output_dir="./classification/" \
-    --task="classification" \
-    --target_col="Protein half-life average [h]" \
-    --sequence_col="aa"
-```
-
 最終的な学習しなおし
-### Train ESM classification Mouse
-```
-python scripts/train.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="facebook/esm2_t33_650M_UR50D" \
-    --architecture="ESM2" \
-    --lr=2e-5 \
-    --epochs=10 \
-    --batch_size=4 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --mask_ratio=0.05 \
-    --mask_prob=0.2 \
-    --n_folds=10 \
-    --output_dir="./classification_ESM2_mouse/" \
-    --task="classification" \
-    --target_col="Protein half-life average [h]" \
-    --sequence_col="aa"
-```
 ### Train PLTNUM classification Mouse
 ```
 python scripts/train.py \
@@ -162,48 +113,7 @@ python scripts/train.py \
     --target_col="Protein half-life average [h]" \
     --sequence_col="aa_foldseek"
 ```
-### Train ESM classification Human
-```
-python scripts/train.py \
-    --data_path="/home2/sagawa/protein-half-life-prediction/Peptide_Level_Turnover_Measurements_Enable_the_Study_of_Proteoform_Dynamics/train_foldseek_target_cleaned.csv" \
-    --model="facebook/esm2_t33_650M_UR50D" \
-    --architecture="ESM2" \
-    --lr=2e-5 \
-    --epochs=10 \
-    --batch_size=4 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --mask_ratio=0.05 \
-    --mask_prob=0.2 \
-    --n_folds=10 \
-    --output_dir="./classification_ESM2_human/" \
-    --task="classification" \
-    --target_col="T1/2 [h]" \
-    --sequence_col="aa"
-```
-### Train PLTNUM classification Human
-```
-python scripts/train.py \
-    --data_path="/home2/sagawa/protein-half-life-prediction/Peptide_Level_Turnover_Measurements_Enable_the_Study_of_Proteoform_Dynamics/train_foldseek_target_cleaned.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --architecture="SaProt" \
-    --lr=2e-5 \
-    --epochs=10 \
-    --batch_size=4 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --mask_ratio=0.05 \
-    --mask_prob=0.2 \
-    --n_folds=10 \
-    --output_dir="./classification_PLTNUM_human/" \
-    --task="classification" \
-    --target_col="T1/2 [h]" \
-    --sequence_col="aa_foldseek"
-```
+
 
 ### SHAP
 ```
