@@ -136,7 +136,9 @@ def predict(folds, model_path, cfg):
 
     predictions = predict_fn(loader, model, cfg)
 
-    folds["prediction"] = predictions
+    folds["raw prediction values"] = predictions
+    if cfg.task == "classification":
+        folds["binary prediction values"] = [1 if x > 0.5 else 0 for x in predictions]
     torch.cuda.empty_cache()
     gc.collect()
     return folds

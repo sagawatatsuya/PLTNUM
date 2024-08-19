@@ -35,7 +35,29 @@ conda install -c conda-forge shap
 ```
 
 ## Usage
-1. foldseekを使用してpdbファイルからstracture aware aa sequenceを作成する。
+### 1. Create a structure-aware amino acid sequence using Foldseek
+We provides two different PLTNUM models based on different architectures: ESM2 and SaProt. If you want to use the SaProt-based PLTNUM, you have to create a structure aware aa sequence using Foldseek.  
+The following command will create a structure aware aa sequence from the PDB files in the `pdb_files` directory and creates an output csv file that contais the information of pdb file path and the structure aware aa sequence.
+```
+python scripts/apply_foldseek_to_pdb.py  \
+    --pdb_dir="pdb_files" \
+    --num_processes=4 \
+    --output_dir="./data"
+```
+### 2. Half-life prediction using PLTNUM
+You can use the PLTNUM model to predict protein half-life from amino acid sequences. The following command will predict protein half-life using the ESM2-based PLTNUM model.
+```
+python scripts/predict_with_PreTrainedModel.py \
+    --data_path="data/demo_input.csv" \
+    --model_path="sagawa/PLTNUM-SaProt-NIH3T3" \
+    --architecture="SaProt" \
+    --batch_size=32 \
+    --use_amp \
+    --num_workers=4 \
+    --output_dir="output" \
+    --sequence_col="aa_foldseek"
+```
+
 2. 作成した配列を基にprediction
 3. 作成した配列を基にSHAP計算
 
@@ -70,132 +92,12 @@ foldseekを適用
 https://drive.google.com/file/d/1B_9t3n_nlj8Y3Kpc_mMjtMdY0OPYa7Re/viewからfoldseekをダウンロードし、bin下に置く
 chmod 777 bin/foldseek
 
-### Run Foldseek
-```
-python scripts/use_foldseek_for_uniprot.py  \
-    --file_path="data/41586_2011_BFnature10098_MOESM304_ESM.xls" \
-    --sheet_name="Sheet1" \
-    --pdb_dir="/home2/sagawa/protein-half-life-prediction/PHLprediction/UP000000589_10090_MOUSE_v4" \
-    --uniprotids_column="Uniprot IDs" \
-    --num_processes=4
-```
 
 
-
-
-
-### Prediction
-```
-python scripts/predict.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --model_path="/home2/sagawa/protein-half-life-prediction/ver20_56/model_ver20_56_fold0.pth" \
-    --architecture="SaProt" \
-    --batch_size=64 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --output_dir="./Peptide_Level_Turnover_Measurements_Enable_the_Study_of_Proteoform_Dynamics_prediction_result/" \
-    --task="classification" \
-    --sequence_col="aa_foldseek"
-```
-
-
-
-
-### Convert trained model to
-```
-python scripts/convert_to_PreTrainedModel.py \
-    --model_path="/home2/sagawa/PLTNUM/classification_ESM2_mouse/model_fold0.pth" \
-    --config_and_tokenizer_path="/home2/sagawa/PLTNUM/classification_ESM2_mouse" \
-    --model="facebook/esm2_t33_650M_UR50D" \
-    --output_dir="/home2/sagawa/PLTNUM/classification_ESM2_mouse_converted"
-```
-```
-python scripts/convert_to_PreTrainedModel.py \
-    --model_path="/home2/sagawa/PLTNUM/classification_PLTNUM_mouse/model_fold0.pth" \
-    --config_and_tokenizer_path="/home2/sagawa/PLTNUM/classification_PLTNUM_mouse" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --output_dir="/home2/sagawa/PLTNUM/classification_PLTNUM_mouse_converted"
-```
-```
-python scripts/convert_to_PreTrainedModel.py \
-    --model_path="/home2/sagawa/PLTNUM/classification_ESM2_human/model_fold0.pth" \
-    --config_and_tokenizer_path="/home2/sagawa/PLTNUM/classification_ESM2_human" \
-    --model="facebook/esm2_t33_650M_UR50D" \
-    --output_dir="/home2/sagawa/PLTNUM/classification_ESM2_human_converted"
-```
-```
-python scripts/convert_to_PreTrainedModel.py \
-    --model_path="/home2/sagawa/PLTNUM/classification_PLTNUM_human/model_fold0.pth" \
-    --config_and_tokenizer_path="/home2/sagawa/PLTNUM/classification_PLTNUM_human" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --output_dir="/home2/sagawa/PLTNUM/classification_PLTNUM_human_converted"
-```
 
 ### Prediction with PreTrainedModel
-```
-python scripts/predict_with_PreTrainedModel.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model_path="/home2/sagawa/PLTNUM/classification_ESM2_mouse_converted" \
-    --architecture="ESM2" \
-    --batch_size=64 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --output_dir="/home2/sagawa/PLTNUM/classification_ESM2_mouse_converted" \
-    --task="classification" \
-    --sequence_col="aa"
-```
-```
-python scripts/predict.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="facebook/esm2_t33_650M_UR50D" \
-    --model_path="/home2/sagawa/PLTNUM/classification_ESM2_mouse/model_fold0.pth" \
-    --architecture="ESM2" \
-    --batch_size=64 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --output_dir="/home2/sagawa/PLTNUM/classification_ESM2_mouse" \
-    --task="classification" \
-    --sequence_col="aa"
-```
 
 
-
-
-
-
-
-
-
-
-
-### Train PLTNUM classification
-```
-python scripts/train.py \
-    --data_path="data/41586_2011_BFnature10098_MOESM304_ESM_foldseek.csv" \
-    --model="westlake-repl/SaProt_650M_AF2" \
-    --architecture="SaProt" \
-    --lr=2e-5 \
-    --epochs=10 \
-    --batch_size=4 \
-    --use_amp \
-    --num_workers=4 \
-    --max_length=512 \
-    --used_sequence="left" \
-    --mask_ratio=0.05 \
-    --mask_prob=0.2 \
-    --n_folds=10 \
-    --output_dir="./classification/" \
-    --task="classification" \
-    --target_col="Protein half-life average [h]" \
-    --sequence_col="aa_foldseek"
-```
 
 ### Train LSTM classification
 ```
@@ -301,4 +203,32 @@ python scripts/train.py \
     --task="classification" \
     --target_col="T1/2 [h]" \
     --sequence_col="aa_foldseek"
+```
+
+### SHAP
+```
+python scripts/calculate_shap.py \
+    --data_path="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse/oof_df.csv" \
+    --model="facebook/esm2_t33_650M_UR50D" \
+    --model_path="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse" \
+    --architecture="ESM2" \
+    --folds=10 \
+    --do_cross_validation \
+    --batch_size=128 \
+    --max_length=512 \
+    --output_dir="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse/cross_validation" \
+    --sequence_col="aa" \
+    --max_evals=2
+```
+```
+python scripts/calculate_shap.py \
+    --data_path="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse/oof_df.csv" \
+    --model="facebook/esm2_t33_650M_UR50D" \
+    --model_path="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse/model_fold0.pth" \
+    --architecture="ESM2" \
+    --batch_size=512 \
+    --max_length=512 \
+    --output_dir="/home2/sagawa/protein-half-life-prediction/classification_ESM2_mouse/no_cross_validation" \
+    --sequence_col="aa" \
+    --max_evals=2
 ```

@@ -11,3 +11,5 @@
 *.bin
 __pycache__
 .ruff_cache
+
+!data/demo_input.csv

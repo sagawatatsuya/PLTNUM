@@ -7,7 +7,7 @@ import torch
 from transformers import AutoTokenizer
 import shap
 
-sys.path.append("../")
+sys.path.append(".")
 from utils import seed_everything, save_pickle
 from models import PLTNUM
 
@@ -72,6 +72,12 @@ def parse_args():
         help="Output directory.",
     )
     parser.add_argument(
+        "--task",
+        type=str,
+        default="classification",
+        help="Task type: 'classification' or 'regression'.",
+    )
+    parser.add_argument(
         "--sequence_col",
         type=str,
         default="aa_foldseek",
@@ -83,6 +89,7 @@ def parse_args():
         default=5000,
         help="Number of evaluations for SHAP values calculation.",
     )
+
 
     return parser.parse_args()
 
@@ -113,26 +120,21 @@ if __name__ == "__main__":
 
     if not os.path.exists(config.output_dir):
         os.makedirs(config.output_dir)
-
     seed_everything(config.seed)
 
     df = pd.read_csv(config.data_path)
-
-    tokenizer = AutoTokenizer.from_pretrained(config.model_path)
-    config.tokenizer = tokenizer
+    config.tokenizer = AutoTokenizer.from_pretrained(config.model)
 
     if config.do_cross_validation:
-        model_weights = glob.glob(os.path.join(config.model_path, "/*.pth"))
+        model_weights = glob.glob(os.path.join(config.model_path, "*.pth"))
         for fold in range(config.folds):
             model = PLTNUM(config).to(config.device)
-            model_weight = [w for w in model_weights if f"fold{fold}.pth" in w]
+            model_weight = [w for w in model_weights if f"fold{fold}.pth" in w][0]
             model.load_state_dict(torch.load(model_weight, map_location="cpu"))
             model.eval()
+
             df_fold = df[df["fold"] == fold].reset_index(drop=True)
-
-            # build an explainer using a token masker
             explainer = shap.Explainer(lambda x: calculate_shap_fn(x, model, config), config.tokenizer)
-
             shap_values = explainer(
                 df_fold[config.sequence_col].values.tolist(),
                 batch_size=config.batch_size,
