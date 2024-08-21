@@ -16,13 +16,13 @@ PLTNUM achieves not only highly accurate protein half-life prediction but also i
 ## Installation
 To set up PLTNUM, you can either clone the repository and create a conda environment or directly install the dependencies via conda:
 
-**Clone and Setup Environment:**
+**Clone and Setup Environment:**  
 ```bash
 git clone https://github.com/sagawatatsuya/PLTNUM.git
 cd PLTNUM
 conda env create -f environment.yml
 ```
-**Direct installation:**
+**Direct installation:**  
 ```bash
 conda create --name pltnum python=3.11.8
 conda activate pltnum
@@ -37,7 +37,7 @@ conda install -c conda-forge shap
 ```
 
 ## Usage
-**1. Create Structure-Aware Sequences**
+**1. Create Structure-Aware Sequences**  
 To use the SaProt-based PLTNUM model, generate structure-aware amino acid sequences with Foldseek:
 ```
 python scripts/apply_foldseek_to_pdb.py  \
@@ -45,7 +45,7 @@ python scripts/apply_foldseek_to_pdb.py  \
     --num_processes=4 \
     --output_dir="./data"
 ```
-**2. Half-life prediction using PLTNUM**
+**2. Half-life prediction using PLTNUM**  
 Predict protein half-life using the PLTNUM model:
 ```
 python scripts/predict_with_PreTrainedModel.py \
@@ -59,7 +59,7 @@ python scripts/predict_with_PreTrainedModel.py \
     --sequence_col="aa_foldseek"
 ```
 
-**3. SHAP analysis**
+**3. SHAP analysis**  
 Interpret predictions with SHAP analysis and search for the sequence that significantly influences the prediction:
 ```
 python scripts/calculate_shap.py \
@@ -73,7 +73,7 @@ python scripts/calculate_shap.py \
     --max_evals=100
 ```
 
-## Train
+## Train  
 You can train PLTNUM with your own dataset. 
 ```
 python scripts/train.py \
@@ -96,7 +96,7 @@ python scripts/train.py \
     --sequence_col="aa_foldseek"
 ```
 
-## Structure
+## Structure  
 ```
 PLTNUM/  
 ├── bin/            # Foldseek's binary file  
