@@ -1,7 +1,6 @@
 *.pth
 *.npy
 *.zip
-*.pdb
 *.pdb.txt
 *.csv
 *.pkl

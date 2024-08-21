@@ -99,11 +99,12 @@ python scripts/train.py \
 ## Structure  
 ```
 PLTNUM/  
-├── bin/            # Foldseek's binary file  
-├── data/           # Datasets  
-├── pdb_files/      # PDB files  
-├── scripts/        # Scripts for training and prediction, etc.
-└── README.md       # This README file  
+├── bin/              # Foldseek's binary file  
+├── data/             # Datasets  
+├── pdb_files/        # PDB files  
+├── scripts/          # Scripts for training and prediction, etc.
+├── environment.yml   # Conda environment file
+└── README.md         # This README file  
 ```
 
 ## Authors
