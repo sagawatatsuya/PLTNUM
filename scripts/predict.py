@@ -2,6 +2,7 @@ import gc
 import os
 import sys
 import argparse
+import itertools
 
 import pandas as pd
 import torch
@@ -101,14 +102,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def predict_fn(valid_loader, model, cfg):
+def predict_fn(dataloader, model, cfg):
     model.eval()
     predictions = []
 
-    for inputs, _ in valid_loader:
+    for inputs, _ in dataloader:
         inputs = inputs.to(cfg.device)
         with torch.no_grad():
-            with torch.cuda.amp.autocast(enabled=cfg.use_amp):
+            with torch.amp.autocast(cfg.device, enabled=cfg.use_amp):
                 preds = (
                     torch.sigmoid(model(inputs))
                     if cfg.task == "classification"
@@ -121,7 +122,7 @@ def predict_fn(valid_loader, model, cfg):
 
 def predict(folds, model_path, cfg):
     dataset = PLTNUMDataset(cfg, folds, train=False)
-    loader = DataLoader(
+    dataloader = DataLoader(
         dataset,
         batch_size=cfg.batch_size,
         shuffle=False,
@@ -134,7 +135,8 @@ def predict(folds, model_path, cfg):
     model.load_state_dict(torch.load(model_path, map_location=cfg.device))
     model.to(cfg.device)
 
-    predictions = predict_fn(loader, model, cfg)
+    predictions = predict_fn(dataloader, model, cfg)
+    predictions = list(itertools.chain.from_iterable(predictions))
 
     folds["raw prediction values"] = predictions
     if cfg.task == "classification":

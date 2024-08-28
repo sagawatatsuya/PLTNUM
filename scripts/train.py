@@ -175,7 +175,7 @@ def parse_args():
 
 def train_fn(train_loader, model, criterion, optimizer, epoch, cfg):
     model.train()
-    scaler = torch.cuda.amp.GradScaler(enabled=cfg.use_amp)
+    scaler = torch.amp.GradScaler(enabled=cfg.use_amp)
     losses = AverageMeter()
     label_list, pred_list = [], []
     start = time.time()
@@ -189,7 +189,7 @@ def train_fn(train_loader, model, criterion, optimizer, epoch, cfg):
         )
         batch_size = labels.size(0)
 
-        with torch.cuda.amp.autocast(enabled=cfg.use_amp):
+        with torch.amp.autocast(cfg.device, enabled=cfg.use_amp):
             y_preds = model(inputs)
         loss = criterion(y_preds, labels.view(-1, 1))
         losses.update(loss.item(), batch_size)
@@ -245,7 +245,7 @@ def valid_fn(valid_loader, model, criterion, cfg):
         )
 
         with torch.no_grad():
-            with torch.cuda.amp.autocast(enabled=cfg.use_amp):
+            with torch.amp.autocast(cfg.device, enabled=cfg.use_amp):
                 y_preds = (
                     torch.sigmoid(model(inputs))
                     if cfg.task == "classification"
@@ -415,7 +415,7 @@ def get_embedding(folds, fold, path, cfg):
     for inputs, _ in valid_loader:
         inputs = inputs.to(device)
         with torch.no_grad():
-            with torch.cuda.amp.autocast(enabled=cfg.use_amp):
+            with torch.amp.autocast(cfg.device, enabled=cfg.use_amp):
                 embedding = model.create_embedding(inputs)
         embedding_list += embedding.tolist()
 

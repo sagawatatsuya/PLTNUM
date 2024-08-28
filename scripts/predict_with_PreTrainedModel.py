@@ -2,6 +2,7 @@ import gc
 import os
 import sys
 import argparse
+import itertools
 
 import pandas as pd
 import torch
@@ -104,7 +105,7 @@ def parse_args():
 
 def predict(folds, model_path, cfg):
     dataset = PLTNUMDataset(cfg, folds, train=False)
-    loader = DataLoader(
+    dataloader = DataLoader(
         dataset,
         batch_size=cfg.batch_size,
         shuffle=False,
@@ -117,9 +118,12 @@ def predict(folds, model_path, cfg):
     # model.load_state_dict(torch.load(os.path.join(model_path, "pytorch_model.bin"), map_location=cfg.device))
     model.to(cfg.device)
 
-    predictions = predict_fn(loader, model, cfg)
+    predictions = predict_fn(dataloader, model, cfg)
+    predictions = list(itertools.chain.from_iterable(predictions))
 
-    folds["prediction"] = predictions
+    folds["raw prediction values"] = predictions
+    if cfg.task == "classification":
+        folds["binary prediction values"] = [1 if x > 0.5 else 0 for x in predictions]
     torch.cuda.empty_cache()
     gc.collect()
     return folds
