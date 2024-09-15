@@ -1,6 +1,7 @@
 # PLTNUM: Protein LifeTime Neural Model
 PLTNUM is a protein language model designed to predict protein half-life from amino acid sequences. It is built upon the [SaProt](https://huggingface.co/westlake-repl/SaProt_650M_AF2) model and is trained on the dataset from [Schwanhäusser, B et al. Nature. 2011](https://www.nature.com/articles/nature10098), which was derived using mass spectrometry and SILAC.  
-PLTNUM achieves not only highly accurate protein half-life prediction but also identification of amino acid residues that significantly influence these predictions utilizing SHAP analysis.
+PLTNUM achieves not only highly accurate protein half-life prediction but also identification of amino acid residues that significantly influence these predictions utilizing SHAP analysis.  
+The [models](https://huggingface.co/sagawa?search_models=PLTNUM) and [demo](https://huggingface.co/spaces/sagawa/PLTNUM) are available on the Hugging Face.
 
 ![model image](https://github.com/sagawatatsuya/PLTNUM/blob/main/model-image.png)
 
@@ -107,7 +108,21 @@ PLTNUM/
 └── README.md         # This README file  
 ```
 
-## Authors
-Tatsuya Sagawa, Eisuke Kanao, and Yasushi Ishihama  
+## Author
+Tatsuya Sagawa  
 
 ## Citation
+```
+@article {Sagawa2024.09.10.612367,
+	author = {Sagawa, Tatsuya and Kanao, Eisuke and Ogata, Kosuke and Imami, Koshi and Ishihama, Yasushi},
+	title = {Prediction of Protein Half-lives from Amino Acid Sequences by Protein Language Models},
+	elocation-id = {2024.09.10.612367},
+	year = {2024},
+	doi = {10.1101/2024.09.10.612367},
+	publisher = {Cold Spring Harbor Laboratory},
+	abstract = {We developed a protein half-life prediction model, PLTNUM, based on a protein language model using an extensive dataset of protein sequences and protein half-lives from the NIH3T3 mouse embryo fibroblast cell line as a training set. PLTNUM achieved an accuracy of 71\% on validation data and showed robust performance with an ROC of 0.73 when applied to a human cell line dataset. By incorporating Shapley Additive Explanations (SHAP) into PLTNUM, we identified key factors contributing to shorter protein half-lives, such as cysteine-containing domains and intrinsically disordered regions. Using SHAP values, PLTNUM can also predict potential degron sequences that shorten protein half-lives. This model provides a platform for elucidating the sequence dependency of protein half-lives, while the uncertainty in predictions underscores the importance of biological context in influencing protein half-lives.Competing Interest StatementThe authors have declared no competing interest.},
+	URL = {https://www.biorxiv.org/content/early/2024/09/14/2024.09.10.612367},
+	eprint = {https://www.biorxiv.org/content/early/2024/09/14/2024.09.10.612367.full.pdf},
+	journal = {bioRxiv}
+}
+```
