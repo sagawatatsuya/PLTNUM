@@ -1,5 +1,5 @@
 import torch.nn as nn
-from transformers import AutoModel, AutoConfig, PreTrainedModel 
+from transformers import AutoConfig, AutoModel, PreTrainedModel
 
 
 class PLTNUM(nn.Module):

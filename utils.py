@@ -1,11 +1,12 @@
-import random
-import os
-import math
-import time
-import numpy as np
-import pickle
-import torch
 import logging
+import math
+import os
+import pickle
+import random
+import time
+
+import numpy as np
+import torch
 
 
 def get_logger(filename: str):

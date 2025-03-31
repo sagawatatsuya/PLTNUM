@@ -1,10 +1,11 @@
-import multiprocessing as mp
-import requests as r
 import argparse
-from Bio import SeqIO
+import multiprocessing as mp
 from io import StringIO
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+import requests as r
+from Bio import SeqIO
 
 
 def parse_args():
@@ -60,7 +61,6 @@ def process_rows(df_chunk, cfg):
 
 if __name__ == "__main__":
     config = parse_args()
-
 
     if config.file_path.endswith(".xls"):
         df = pd.read_excel(

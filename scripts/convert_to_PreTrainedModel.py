@@ -1,12 +1,11 @@
-import os
-import sys
 import argparse
+import os
+import shutil
+import sys
 
 import torch
-import shutil
 
-# Append the utils module path
-sys.path.append("../")
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from models import PLTNUM
 
 
@@ -57,5 +56,13 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load(config.model_path, map_location="cpu"))
 
     torch.save(model.state_dict(), os.path.join(config.output_dir, "pytorch_model.bin"))
-    for filename in ["config.json", "special_tokens_map.json", "tokenizer_config.json", "vocab.txt"]:
-        shutil.copy(os.path.join(config.config_and_tokenizer_path, filename), os.path.join(config.output_dir, filename))
+    for filename in [
+        "config.json",
+        "special_tokens_map.json",
+        "tokenizer_config.json",
+        "vocab.txt",
+    ]:
+        shutil.copy(
+            os.path.join(config.config_and_tokenizer_path, filename),
+            os.path.join(config.output_dir, filename),
+        )

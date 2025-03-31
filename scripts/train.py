@@ -1,8 +1,8 @@
+import argparse
 import gc
 import os
 import sys
 import time
-import argparse
 
 import numpy as np
 import pandas as pd
@@ -16,9 +16,9 @@ from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, get_cosine_schedule_with_warmup
 
 sys.path.append(".")
-from utils import AverageMeter, get_logger, seed_everything, timeSince
-from datasets import PLTNUMDataset, LSTMDataset
+from datasets import LSTMDataset, PLTNUMDataset
 from models import PLTNUM, LSTMModel
+from utils import AverageMeter, get_logger, seed_everything, timeSince
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -362,21 +362,23 @@ def train_loop(folds, fold, cfg):
 
         if cfg.task == "classification":
             cfg.logger.info(
-                f"Epoch {epoch+1} - avg_train_loss: {avg_loss:.4f}  train_acc: {train_score:.4f}  valid_acc: {val_score2:.4f}  valid_f1: {val_score:.4f}  time: {elapsed:.0f}s"
+                f"Epoch {epoch + 1} - avg_train_loss: {avg_loss:.4f}  train_acc: {train_score:.4f}  valid_acc: {val_score2:.4f}  valid_f1: {val_score:.4f}  time: {elapsed:.0f}s"
             )
         elif cfg.task == "regression":
             cfg.logger.info(
-                f"Epoch {epoch+1} - avg_train_loss: {avg_loss:.4f}  train_r2: {train_score:.4f}  valid_r2: {val_score2:.4f}  valid_loss: {val_score:.4f}  time: {elapsed:.0f}s"
+                f"Epoch {epoch + 1} - avg_train_loss: {avg_loss:.4f}  train_r2: {train_score:.4f}  valid_r2: {val_score2:.4f}  valid_loss: {val_score:.4f}  time: {elapsed:.0f}s"
             )
 
         if (cfg.task == "classification" and best_score < val_score) or (
             cfg.task == "regression" and best_score > val_score
         ):
             best_score = val_score
-            cfg.logger.info(f"Epoch {epoch+1} - Save Best Score: {val_score:.4f} Model")
+            cfg.logger.info(
+                f"Epoch {epoch + 1} - Save Best Score: {val_score:.4f} Model"
+            )
             torch.save(
                 predictions,
-                os.path.join(cfg.output_dir, f"predictions.pth"),
+                os.path.join(cfg.output_dir, "predictions.pth"),
             )
             torch.save(
                 model.state_dict(),
@@ -384,7 +386,7 @@ def train_loop(folds, fold, cfg):
             )
 
     predictions = torch.load(
-        os.path.join(cfg.output_dir, f"predictions.pth"), map_location="cpu"
+        os.path.join(cfg.output_dir, "predictions.pth"), map_location="cpu"
     )
     valid_folds["prediction"] = predictions
     cfg.logger.info(f"[Fold{fold}] Best score: {best_score}")

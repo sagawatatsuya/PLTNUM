@@ -1,9 +1,10 @@
-import os
-import random
 import argparse
 import glob
-import pandas as pd
 import multiprocessing as mp
+import os
+import random
+
+import pandas as pd
 from foldseek_util import get_struc_seq
 
 

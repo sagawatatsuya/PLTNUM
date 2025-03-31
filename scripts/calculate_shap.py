@@ -1,15 +1,16 @@
-import os
-import glob
-import sys
 import argparse
+import glob
+import os
+import sys
+
 import pandas as pd
+import shap
 import torch
 from transformers import AutoTokenizer
-import shap
 
-sys.path.append(".")
-from utils import seed_everything, save_pickle
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from models import PLTNUM, PLTNUM_PreTrainedModel
+from utils import save_pickle, seed_everything
 
 
 def parse_args():
@@ -90,7 +91,6 @@ def parse_args():
         help="Number of evaluations for SHAP values calculation.",
     )
 
-
     return parser.parse_args()
 
 
@@ -134,20 +134,29 @@ if __name__ == "__main__":
             model.eval()
 
             df_fold = df[df["fold"] == fold].reset_index(drop=True)
-            explainer = shap.Explainer(lambda x: calculate_shap_fn(x, model, config), config.tokenizer)
+            explainer = shap.Explainer(
+                lambda x: calculate_shap_fn(x, model, config), config.tokenizer
+            )
             shap_values = explainer(
                 df_fold[config.sequence_col].values.tolist(),
                 batch_size=config.batch_size,
                 max_evals=config.max_evals,
             )
 
-            save_pickle(os.path.join(config.output_dir, f"shap_values_fold{fold}.pickle"), shap_values)
+            save_pickle(
+                os.path.join(config.output_dir, f"shap_values_fold{fold}.pickle"),
+                shap_values,
+            )
     else:
-        model = PLTNUM_PreTrainedModel.from_pretrained(config.model_path, cfg=config).to(config.device)
+        model = PLTNUM_PreTrainedModel.from_pretrained(
+            config.model_path, cfg=config
+        ).to(config.device)
         model.eval()
 
         # build an explainer using a token masker
-        explainer = shap.Explainer(lambda x: calculate_shap_fn(x, model, config), config.tokenizer)
+        explainer = shap.Explainer(
+            lambda x: calculate_shap_fn(x, model, config), config.tokenizer
+        )
 
         shap_values = explainer(
             df[config.sequence_col].values.tolist(),
@@ -155,6 +164,4 @@ if __name__ == "__main__":
             max_evals=config.max_evals,
         )
 
-        save_pickle(
-            os.path.join(config.output_dir, "shap_values.pickle"), shap_values
-        )
+        save_pickle(os.path.join(config.output_dir, "shap_values.pickle"), shap_values)

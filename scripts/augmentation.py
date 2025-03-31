@@ -1,12 +1,53 @@
 import random
 
+
 def random_change_augmentation(aas, cfg):
-    residue_tokens = ("A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y")
-    stracture_aware_tokens = ("a", "c", "d", "e", "f", "g", "h", "i", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "y")
-    length = len(aas)
-    swap_indices = random.sample(
-        range(length), int(length * cfg.random_change_ratio)
+    residue_tokens = (
+        "A",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "K",
+        "L",
+        "M",
+        "N",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "V",
+        "W",
+        "Y",
     )
+    stracture_aware_tokens = (
+        "a",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "k",
+        "l",
+        "m",
+        "n",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "v",
+        "w",
+        "y",
+    )
+    length = len(aas)
+    swap_indices = random.sample(range(length), int(length * cfg.random_change_ratio))
     new_aas = ""
     for i, aa in enumerate(aas):
         if i in swap_indices:

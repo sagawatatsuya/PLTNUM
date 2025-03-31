@@ -1,8 +1,8 @@
+import argparse
 import gc
+import itertools
 import os
 import sys
-import argparse
-import itertools
 
 import pandas as pd
 import torch
@@ -10,10 +10,10 @@ from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
 sys.path.append(".")
-from utils import seed_everything
-from models import PLTNUM_PreTrainedModel
 from datasets import PLTNUMDataset
+from models import PLTNUM_PreTrainedModel
 from predict import predict_fn
+from utils import seed_everything
 
 
 def parse_args():

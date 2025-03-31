@@ -22,10 +22,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
 import json
-import numpy as np
+import os
 import sys
+
+import numpy as np
 
 sys.path.append(".")
 
@@ -55,9 +56,9 @@ def get_struc_seq(
     """
     assert os.path.exists(foldseek), f"Foldseek not found: {foldseek}"
     assert os.path.exists(path), f"Pdb file not found: {path}"
-    assert plddt_path is None or os.path.exists(
-        plddt_path
-    ), f"Plddt file not found: {plddt_path}"
+    assert plddt_path is None or os.path.exists(plddt_path), (
+        f"Plddt file not found: {plddt_path}"
+    )
 
     tmp_save_path = f"get_struc_seq_{process_id}.tsv"
     cmd = f"{foldseek} structureto3didescriptor -v 0 --threads 1 --chain-name-mode 1 {path} {tmp_save_path}"

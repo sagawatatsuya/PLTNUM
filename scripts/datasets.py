@@ -1,13 +1,14 @@
 import random
+
 import numpy as np
 import torch
-from torch.utils.data import Dataset
 from augmentation import (
     mask_augmentation,
     random_change_augmentation,
     random_delete_augmentation,
     truncate_augmentation,
 )
+from torch.utils.data import Dataset
 
 
 def tokenize_input(cfg, text):
@@ -35,7 +36,33 @@ def one_hot_encoding(aa, amino_acids, cfg):
 
 
 def one_hot_encode_input(text, cfg):
-    inputs = one_hot_encoding(text, ("A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y"," "), cfg)
+    inputs = one_hot_encoding(
+        text,
+        (
+            "A",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "K",
+            "L",
+            "M",
+            "N",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "V",
+            "W",
+            "Y",
+            " ",
+        ),
+        cfg,
+    )
     return torch.tensor(inputs, dtype=torch.float)
 
 
@@ -67,7 +94,7 @@ class PLTNUMDataset(Dataset):
         max_length = (self.cfg.max_length - 2) * self.cfg.token_length
         if len(aas) > max_length:
             if self.cfg.used_sequence == "left":
-                return aas[: max_length]
+                return aas[:max_length]
             elif self.cfg.used_sequence == "right":
                 return aas[-max_length:]
             elif self.cfg.used_sequence == "both":
@@ -75,7 +102,7 @@ class PLTNUMDataset(Dataset):
                 return aas[:half_max_len] + "__" + aas[-half_max_len:]
             elif self.cfg.used_sequence == "internal":
                 offset = (len(aas) - max_length) // 2
-                return aas[offset:offset + max_length]
+                return aas[offset : offset + max_length]
         return aas
 
     def _apply_augmentation(self, aas):
@@ -123,5 +150,5 @@ class LSTMDataset(Dataset):
                 return aas[:half_max_len] + "__" + aas[-half_max_len:]
             elif self.cfg.used_sequence == "internal":
                 offset = (len(aas) - max_length) // 2
-                return aas[offset:offset + max_length]
+                return aas[offset : offset + max_length]
         return aas
